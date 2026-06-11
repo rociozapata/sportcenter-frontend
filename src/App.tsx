@@ -1,8 +1,8 @@
 import './App.css'
-
+import Home from './pages/Home/Home'
 function App() {
   return (
-    <h1>SportCenter</h1>
+    <Home/>
   )
 }
 

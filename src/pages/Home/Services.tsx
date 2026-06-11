@@ -1,6 +1,6 @@
-function Service(){
+function Services(){
 
     return <section>Service</section>
 }
 
-export default Service;
+export default Services;
