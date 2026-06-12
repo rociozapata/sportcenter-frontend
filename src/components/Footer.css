@@ -1,0 +1,29 @@
+.footer{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 30px 20px;
+}
+
+.footer section{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+
+@media (min-width: 768px) {
+    .footer{
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+
+    .footer section{
+        flex: 1;
+    }
+}
