@@ -33,7 +33,7 @@ function Navbar() {
           <Link to="/servicios" onClick={closeMenu}>Servicios</Link>
           <Link to="/turnos" onClick={closeMenu}>Mis turnos</Link>
         </div>
-        <div className="navbar-auth">y
+        <div className="navbar-auth">
           <Link to="/perfil" onClick={closeMenu}>
             <img src={perfilIcono} alt="Icono usuario" width={24} height={24} />
           </Link>

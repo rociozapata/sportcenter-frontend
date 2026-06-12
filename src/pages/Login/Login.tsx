@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 
 
-export function Login(){
+function Login(){
     
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -20,4 +20,7 @@ export function Login(){
 
     
     }
+    return <section>Prueba</section>
 }
+
+export default Login;
