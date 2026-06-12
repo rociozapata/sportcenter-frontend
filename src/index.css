@@ -6,6 +6,11 @@
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+  --primary: #1A365D;
+  --secondary: #ADFF2F;
+  --tertiary: #4A5568;
+  --neutral: #F7FAFC;
+
   font: 18px/145% var(--sans);
   color-scheme: light dark;
   color: var(--text);
