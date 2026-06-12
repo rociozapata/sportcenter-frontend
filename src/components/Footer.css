@@ -3,24 +3,41 @@
     flex-direction: column;
     text-align: center;
     gap: 20px;
-    justify-content: space-between;
-    padding: 30px 20px;
+    padding: 15px 20px;
+
+    background-color: var(--primary);
+    font-family: var(--sans);
+    color: var(--neutral);
 }
 
 .footer section{
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+    
 }
 
+.footer a{
+    color: var(--text);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
 
-
+.footer h3{
+    margin: 0;
+    color: var(--secondary);
+}
 
 @media (min-width: 768px) {
     .footer{
         flex-direction: row;
         justify-content: space-between;
         text-align: left;
+        align-items: flex-start;
+        gap: 50px;
     }
 
     .footer section{
