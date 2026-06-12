@@ -1,17 +1,13 @@
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import Hero from "../../pages/Home/Hero";
-import Services from "../../pages/Home/Services";
-function Home(){
+import Hero from "./Hero";
+import Services from "./Services";
 
+function Home() {
     return (
         <>
-            <Navbar />
             <Hero />
             <Services />
-            <Footer />
         </>
-    )
+    );
 }
 
-export default Home
+export default Home;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Navbar.css";
 import perfilIcono from "../assets/profile-svgrepo-com.svg";
 
@@ -10,9 +11,9 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <a href="/">
+        <Link to="/">
           <h2>SportCenter</h2>
-        </a>
+        </Link>
       </div>
 
       <button
@@ -28,15 +29,15 @@ function Navbar() {
 
       <div className={`navbar-menu ${isOpen ? "is-open" : ""}`}>
         <div className="navbar-links">
-          <a href="" onClick={closeMenu}>Inicio</a>
-          <a href="" onClick={closeMenu}>Servicios</a>
-          <a href="" onClick={closeMenu}>Mis turnos</a>
+          <Link to="/" onClick={closeMenu}>Inicio</Link>
+          <Link to="/servicios" onClick={closeMenu}>Servicios</Link>
+          <Link to="/turnos" onClick={closeMenu}>Mis turnos</Link>
         </div>
-        <div className="navbar-auth">
-          <a href="" onClick={closeMenu}>
+        <div className="navbar-auth">y
+          <Link to="/perfil" onClick={closeMenu}>
             <img src={perfilIcono} alt="Icono usuario" width={24} height={24} />
-          </a>
-          <button className="nav-button" onClick={closeMenu}>Reservar</button>
+          </Link>
+          <Link to="/turnos" className="nav-button" onClick={closeMenu}>Reservar</Link>
         </div>
       </div>
     </nav>

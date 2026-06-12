@@ -1,6 +1,9 @@
-function Service(){
-
-    return <section>Service</section>
+function Services() {
+    return (
+        <section>
+            <h1>Servicios</h1>
+        </section>
+    );
 }
 
-export default Service;
+export default Services;
