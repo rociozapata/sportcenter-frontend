@@ -1,0 +1,62 @@
+/* CONTENEDOR PRINCIPAL (El Padre de las Tarjetas) */
+
+.service-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    margin: 4rem;
+    padding: 0 8%;
+    
+
+}
+
+.card-item {
+    overflow: hidden; /* Esto evita que la foto tape el redondeado de las esquinas */
+    width: 300px;
+    background-color: (--primary);
+}
+
+/* Animación cuando pasás el mouse por arriba de la tarjeta */
+.card-item:hover {
+    transform: translateY(-2px);
+    background-color: #c4ff1f;
+}
+
+.card-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover; /* Truco mágico para que la foto no se deforme */
+
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+
+.card-content h3 {
+    /* Pista: Color blanco (#ffffff) y un margen abajo chico */
+
+}
+
+/* Descripción / Chamuyo */
+.card-content p {
+    /* Pista: Color gris claro (#c5d1e0) y margen abajo para separar del botón */
+
+}
+
+/* ==========================================================================
+   BOTÓN "VER HORARIOS"
+   ========================================================================== */
+.card-button {
+    /* Pista: Cloná idéntico el diseño de .hero-btn-primary (fondo #b5f000, letras #0a1929) */
+
+}
+
+/* Animación del botón */
+.card-button:hover {
+    /* Pista: Cloná el hover del botón primary del Hero */
+
+}
