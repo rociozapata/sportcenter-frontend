@@ -50,6 +50,7 @@
     font-weight: bold;
     color: var(--primary);
     cursor: pointer;
+    text-decoration: none;     /* el <a> por defecto subraya, lo sacamos para que parezca botón */
 }
 
 .nav-button:hover {

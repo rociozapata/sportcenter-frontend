@@ -1,46 +1,148 @@
-.footer{
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-    padding: 15px 20px;
-
+/* Footer: contenedor general, fondo primary y texto claro. */
+.footer {
     background-color: var(--primary);
     font-family: var(--sans);
     color: var(--neutral);
+    padding: 40px 24px 0;          /* mucho aire arriba/abajo y a los costados */
 }
 
-.footer section{
+/* Grilla de columnas: en mobile una sola columna, en desktop tres. */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;     /* 1 columna por defecto (mobile) */
+    gap: 32px;                      /* separación entre columnas/secciones */
+    max-width: 1200px;              /* el contenido no se estira infinito */
+    margin: 0 auto;                 /* centrado horizontal */
+    padding-bottom: 32px;
+}
+
+/* Cada columna apila su contenido verticalmente. */
+.footer-col {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex-wrap: wrap;
-    
+    gap: 10px;
 }
 
-.footer a{
-    color: var(--text);
-    display: flex;
-    flex-direction: row;
+/* Títulos de cada columna en color secundario (verde lima) para que resalten. */
+.footer-col h3 {
+    margin: 0 0 8px;
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+/* Link genérico del footer: ícono + texto en una sola línea. */
+.footer-link {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    color: var(--neutral);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.footer h3{
+/* Hover: leve cambio de color y empujón a la derecha para indicar interacción. */
+.footer-link:hover {
+    color: var(--secondary);
+    transform: translateX(2px);
+}
+
+/* Para íconos: que tengan tamaño consistente. */
+.footer-link svg {
+    font-size: 1.1rem;
+    flex-shrink: 0;                 /* el ícono no se achica si el texto es largo */
+}
+
+/* "footer-static" es un .footer-link que no es clickeable (ej. horarios). */
+.footer-static {
+    cursor: default;
+    align-items: flex-start;        /* alinea ícono con la primera línea del texto */
+}
+
+.footer-static:hover {
+    color: var(--neutral);          /* no cambia de color al hacer hover */
+    transform: none;
+}
+
+/* Columna central: el "branding" del sitio. Centrada y un poco más ancha. */
+.footer-brand {
+    text-align: center;
+    align-items: center;
+}
+
+.footer-logo {
     margin: 0;
     color: var(--secondary);
+    font-size: 2rem;
+    letter-spacing: 1px;
 }
 
+.footer-tagline {
+    margin: 0;
+    color: var(--neutral);
+    max-width: 320px;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* Contenedor de los íconos de redes sociales (Instagram, Facebook). */
+.footer-socials {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+/* Cada ícono de red social va en un círculo. */
+.footer-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;             /* círculo perfecto */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--neutral);
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-social:hover {
+    background-color: var(--secondary);
+    color: var(--primary);
+    transform: translateY(-2px);    /* se levanta un poco al pasar el mouse */
+}
+
+/* Línea divisora + barra inferior con el copyright. */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 18px 0;
+    text-align: center;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.footer-bottom p {
+    margin: 0;
+}
+
+/* ─── Desktop (768px en adelante) ─── */
 @media (min-width: 768px) {
-    .footer{
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: left;
-        align-items: flex-start;
-        gap: 50px;
+    .footer {
+        padding: 56px 40px 0;
     }
 
-    .footer section{
-        flex: 1;
+    /* Tres columnas: la del medio es más ancha que las laterales. */
+    .footer-grid {
+        grid-template-columns: 1fr 1.4fr 1fr;
+        gap: 60px;
+        text-align: left;
+        align-items: start;
+    }
+
+    /* En desktop la columna central sigue centrada visualmente. */
+    .footer-brand {
+        text-align: center;
+        align-items: center;
     }
 }

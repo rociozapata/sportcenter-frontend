@@ -1,11 +1,13 @@
-/* Sección contenedora: ocupa toda la pantalla y pinta el fondo con el primary. */
+/* Sección contenedora: ocupa toda la pantalla.
+   Usa un gradiente sutil basado en --primary para que el fondo NO sea idéntico
+   al footer (que también es primary plano) y se note la separación visual. */
 .auth-section {
   min-height: calc(100vh - 160px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: var(--primary);
+  background: linear-gradient(135deg, #24467a 0%, var(--primary) 60%, #122544 100%);
 }
 
 /* La "tarjeta" del formulario en color neutral (casi blanco). */
