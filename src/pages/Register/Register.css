@@ -1,0 +1,3 @@
+/* Register reusa los estilos de Login (.auth-section / .auth-form / ...).
+   Importamos ese archivo para no duplicar reglas. */
+@import "../Login/Login.css";

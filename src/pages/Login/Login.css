@@ -1,0 +1,93 @@
+/* Sección contenedora: ocupa toda la pantalla y pinta el fondo con el primary. */
+.auth-section {
+  min-height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: var(--primary);
+}
+
+/* La "tarjeta" del formulario en color neutral (casi blanco). */
+.auth-form {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 2rem;
+  border-radius: 12px;
+  background: var(--neutral);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Título en color primary para que combine con el fondo. */
+.auth-form h1 {
+  margin: 0 0 1rem;
+  text-align: center;
+  color: var(--primary);
+}
+
+/* Nombres de los campos: color fijo oscuro para que se vean bien
+   sobre la tarjeta neutral, incluso si el sistema está en modo oscuro
+   (la variable --text-h se invierte en dark mode). */
+.auth-form label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Inputs con fondo blanco y texto fijo oscuro (mismo motivo que los labels). */
+.auth-form input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  color: #1f2937;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Botón principal: usa el primary del proyecto. */
+.auth-form button {
+  margin-top: 0.5rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-form button:disabled {
+  background: var(--tertiary);
+  cursor: not-allowed;
+}
+
+/* Caja de error: rojo suave, mismo patrón que muchos forms. */
+.auth-error {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Línea inferior con el link a registro / login. */
+.auth-switch {
+  text-align: center;
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 600;
+}

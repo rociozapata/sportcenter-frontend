@@ -1,12 +1,21 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Navbar.css";
 import perfilIcono from "../assets/profile-svgrepo-com.svg";
+import { isAuthenticated } from "../services/auth";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
+
+  // useLocation cambia cada vez que navegamos. Lo usamos como "pista" para
+  // que React recalcule isAuthenticated() al cambiar de ruta (ej. después
+  // de loguearse y redirigir al home, el icono ya apunta a /perfil).
+  useLocation();
+
+  // Si hay token guardado, el icono lleva al perfil; si no, al login.
+  const perfilHref = isAuthenticated() ? "/perfil" : "/login";
 
   return (
     <nav className="navbar">
@@ -34,7 +43,7 @@ function Navbar() {
           <Link to="/turnos" onClick={closeMenu}>Mis turnos</Link>
         </div>
         <div className="navbar-auth">
-          <Link to="/perfil" onClick={closeMenu}>
+          <Link to={perfilHref} onClick={closeMenu}>
             <img src={perfilIcono} alt="Icono usuario" width={24} height={24} />
           </Link>
           <Link to="/turnos" className="nav-button" onClick={closeMenu}>Reservar</Link>
