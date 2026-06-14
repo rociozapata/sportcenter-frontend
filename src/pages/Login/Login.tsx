@@ -85,7 +85,7 @@ function Login() {
         {error && <p className="auth-error">{error}</p>}
 
         {/* Mientras loading es true, el botón queda gris y muestra otro texto. */}
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
 

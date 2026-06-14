@@ -40,7 +40,7 @@ function Services() {
                     <div className="card-content">
                         <h3>{s.title}</h3>
                         <p>{s.description}</p>
-                        <button className="card-button">Ver horarios</button>
+                        <button className="btn btn-accent">Ver horarios</button>
                     </div>
                 </article>
             

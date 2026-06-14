@@ -42,20 +42,8 @@
     text-decoration: underline;
 }
 
-.nav-button {
-    background-color: var(--secondary);
-    border-radius: 20px;
-    border: none;
-    padding: 8px 20px;
-    font-weight: bold;
-    color: var(--primary);
-    cursor: pointer;
-    text-decoration: none;     /* el <a> por defecto subraya, lo sacamos para que parezca botón */
-}
-
-.nav-button:hover {
-    opacity: 0.8;
-}
+/* .nav-button fue reemplazado por las clases globales .btn .btn-accent
+   definidas en src/styles/buttons.css. */
 
 .navbar-auth {
     display: flex;
@@ -250,8 +238,8 @@
         width: 100%;
     }
 
-    .nav-button {
+    /* En mobile el CTA "Reservar" estira a todo el ancho del menú. */
+    .navbar-auth .btn {
         flex: 1;
-        padding: 10px 20px;
     }
 }

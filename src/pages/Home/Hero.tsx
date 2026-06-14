@@ -13,10 +13,10 @@ function Hero() {
                     alto nivel para atletas que buscan dar lo mejor en cada entrenamiento.
                 </p>
                 <div className="hero-actions">
-                    <button className="hero-btn hero-btn-primary">
+                    <button className="btn btn-accent btn-lg">
                         Reservar Turno →
                     </button>
-                    <button className="hero-btn hero-btn-secondary">
+                    <button className="btn btn-outlined-light btn-lg">
                         Ver clases
                     </button>
                 </div>

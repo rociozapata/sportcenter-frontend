@@ -112,7 +112,7 @@ function Register() {
         {/* Mensaje de error condicional. */}
         {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
           {loading ? "Creando cuenta..." : "Crear cuenta"}
         </button>
 

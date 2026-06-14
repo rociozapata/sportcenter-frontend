@@ -47,16 +47,5 @@
 
 }
 
-/* ==========================================================================
-   BOTÓN "VER HORARIOS"
-   ========================================================================== */
-.card-button {
-    /* Pista: Cloná idéntico el diseño de .hero-btn-primary (fondo #b5f000, letras #0a1929) */
-
-}
-
-/* Animación del botón */
-.card-button:hover {
-    /* Pista: Cloná el hover del botón primary del Hero */
-
-}
+/* El botón "Ver horarios" ahora usa las clases globales .btn .btn-accent
+   (definidas en src/styles/buttons.css). */

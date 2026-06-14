@@ -54,21 +54,12 @@
   border-color: var(--primary);
 }
 
-/* Botón principal: usa el primary del proyecto. */
-.auth-form button {
+/* El botón submit ahora usa las clases globales .btn .btn-primary
+   (definidas en src/styles/buttons.css). Esta clase extra le da el
+   ancho completo del form y un poco de margen arriba. */
+.auth-submit {
+  width: 100%;
   margin-top: 0.5rem;
-  padding: 0.7rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.auth-form button:disabled {
-  background: var(--tertiary);
-  cursor: not-allowed;
 }
 
 /* Caja de error: rojo suave, mismo patrón que muchos forms. */

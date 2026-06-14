@@ -4,6 +4,10 @@
    display=swap evita que el texto quede invisible mientras cargan las fonts. */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
+/* Sistema de botones reutilizable. Cargado a nivel global así está
+   disponible en cualquier página/componente sin importarlo de nuevo. */
+@import './styles/buttons.css';
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

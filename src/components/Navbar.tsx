@@ -191,7 +191,7 @@ function Navbar() {
           </div>
 
           {/* Botón principal de acción: lleva a la página de turnos. */}
-          <Link to="/turnos" className="nav-button" onClick={closeMenu}>Reservar</Link>
+          <Link to="/turnos" className="btn btn-accent" onClick={closeMenu}>Reservar</Link>
         </div>
       </div>
     </nav>

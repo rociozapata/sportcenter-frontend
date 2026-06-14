@@ -1,0 +1,136 @@
+/* ============================================================
+   Sistema de botones
+   ------------------------------------------------------------
+   Una clase base (.btn) + variantes (.btn-primary, .btn-secondary,
+   .btn-inverted, .btn-outlined) + un patrón para botones-ícono
+   circulares (.icon-btn).
+
+   Uso:
+     <button class="btn btn-primary">Reservar</button>
+     <a class="btn btn-outlined" href="...">Cancelar</a>
+     <button class="icon-btn icon-btn-primary">✎</button>
+   ============================================================ */
+
+/* Clase base: todo lo común a todos los botones.
+   Las variantes solo cambian color de fondo, texto y borde. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;                       /* separación entre ícono y texto si hay */
+    padding: 10px 20px;
+    border-radius: 20px;            /* pill shape como en el mockup */
+    border: 1px solid transparent;  /* transparente para que outlined "sume" sin saltar de tamaño */
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;          /* anula el subrayado cuando se usa en <a> */
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+    user-select: none;
+}
+
+/* Estado deshabilitado común. Funciona tanto para <button disabled>
+   como para clases agregadas manualmente. */
+.btn:disabled,
+.btn.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ----- Variante PRIMARY: fondo navy, texto claro. Acción principal. ----- */
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--neutral);
+}
+.btn-primary:hover:not(:disabled) {
+    background-color: #24467a;      /* tono más claro del navy para feedback de hover */
+}
+
+/* ----- Variante SECONDARY: gris claro con texto navy. Acción secundaria neutral. ----- */
+.btn-secondary {
+    background-color: #EDF2F7;      /* gris claro del sistema */
+    color: var(--primary);
+}
+.btn-secondary:hover:not(:disabled) {
+    background-color: #E2E8F0;
+}
+
+/* ----- Variante INVERTED: fondo oscuro (tertiary). Útil sobre fondos claros
+   cuando primary ya está siendo usado para otra cosa, o como CTA alternativo. ----- */
+.btn-inverted {
+    background-color: var(--tertiary);
+    color: var(--neutral);
+}
+.btn-inverted:hover:not(:disabled) {
+    background-color: #5a6578;
+}
+
+/* ----- Variante OUTLINED: solo borde, fondo transparente. Acción terciaria. ----- */
+.btn-outlined {
+    background-color: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-outlined:hover:not(:disabled) {
+    background-color: var(--primary);
+    color: var(--neutral);
+}
+
+/* ----- Variante OUTLINED-LIGHT: borde blanco sobre fondos oscuros (ej. hero). ----- */
+.btn-outlined-light {
+    background-color: transparent;
+    color: #ffffff;
+    border-color: #ffffff;
+}
+.btn-outlined-light:hover:not(:disabled) {
+    background-color: #ffffff;
+    color: var(--primary);
+}
+
+/* ----- Modifier de tamaño grande, útil para CTAs de landing/hero. ----- */
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 1rem;
+    border-radius: 24px;
+}
+
+/* ----- Variante ACCENT: usa el verde lima como CTA fuerte (ej. "Reservar"). ----- */
+.btn-accent {
+    background-color: var(--secondary);
+    color: var(--primary);
+}
+.btn-accent:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+/* ============================================================
+   Botones-ícono circulares
+   Como los de la última fila del mockup. Cuadrado perfecto + radius 50%. */
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+.icon-btn:hover:not(:disabled) {
+    opacity: 0.85;
+}
+.icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Variantes de color para iconos circulares. Texto/SVG en claro. */
+.icon-btn-primary  { background-color: var(--primary);   color: var(--neutral); }
+.icon-btn-accent   { background-color: var(--secondary); color: var(--primary); }
+.icon-btn-tertiary { background-color: var(--tertiary);  color: var(--neutral); }
+.icon-btn-danger   { background-color: #E53E3E;          color: var(--neutral); }

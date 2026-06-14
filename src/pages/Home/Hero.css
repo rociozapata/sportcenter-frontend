@@ -49,37 +49,10 @@
     flex-wrap: wrap;
 }
 
-.hero-btn {
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 0.95rem 1.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
-    font-family: inherit;
-}
-
-.hero-btn-primary {
-    background-color: #b5f000;
-    color: #0a1929;
-    border: 2px solid #b5f000;
-}
-
-.hero-btn-primary:hover {
-    transform: translateY(-2px);
-    background-color: #c4ff1f;
-}
-
-.hero-btn-secondary {
-    background-color: transparent;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-}
-
-.hero-btn-secondary:hover {
-    background-color: #ffffff;
-    color: #0a1929;
-}
+/* Los botones del hero ahora usan las clases globales:
+   - "Reservar Turno" → .btn .btn-accent .btn-lg
+   - "Ver clases"     → .btn .btn-outlined-light .btn-lg
+   Las clases viven en src/styles/buttons.css. */
 
 @media (max-width: 640px) {
     .hero {
@@ -92,7 +65,7 @@
         width: 100%;
     }
 
-    .hero-btn {
+    .hero-actions .btn {
         width: 100%;
     }
 }
