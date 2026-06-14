@@ -1,0 +1,111 @@
+/* Sección de beneficios: dos columnas (texto + imagen) en desktop,
+   apiladas en mobile. Fondo claro del neutral del sistema. */
+.benefits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    padding: 5rem 8%;
+    background-color: var(--neutral);
+}
+
+/* Columna izquierda: texto y CTA. */
+.benefits-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Textito chico arriba del título, en mayúsculas y con tracking. */
+.benefits-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--tertiary);
+}
+
+.benefits-title {
+    margin: 0;
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    line-height: 1.15;
+    color: var(--primary);
+}
+
+/* Reset de la lista: sin bullets, sin padding. */
+.benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Cada beneficio: ícono a la izquierda, texto a la derecha. */
+.benefit-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+/* Caja verde del ícono. Fondo secondary, ícono en color primary. */
+.benefit-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background-color: var(--secondary);
+    color: var(--primary);
+}
+
+.benefit-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.05rem;
+    color: var(--primary);
+}
+
+.benefit-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--tertiary);
+}
+
+/* Le damos al CTA un poco de margen arriba para separarlo de la lista,
+   y un ancho propio (no full-width) usando align-self. */
+.benefits-content .btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+}
+
+/* Columna derecha: imagen con esquinas redondeadas. */
+.benefits-media img {
+    width: 100%;
+    height: 100%;
+    max-height: 460px;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+}
+
+/* Mobile: una sola columna, padding reducido, CTA full-width. */
+@media (max-width: 768px) {
+    .benefits {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        padding: 3rem 5%;
+    }
+
+    .benefits-content .btn {
+        align-self: stretch;
+    }
+
+    /* En mobile ocultamos la imagen para priorizar el texto y el CTA. */
+    .benefits-media {
+        display: none;
+    }
+}
