@@ -1,6 +1,30 @@
 .services {
+    position: relative;          /* ancla para el .services-wave absoluto */
     padding: 5rem 8%;
-    background-color: #f5f7fa;
+    /* Antes era #f5f7fa; ahora compartimos --neutral con Benefits para
+       que la transición entre ambas secciones desaparezca. */
+    background-color: var(--neutral);
+}
+
+/* Wave decorativa pegada al borde superior de Services.
+   Como tiene el color oscuro del Hero, visualmente "estira" el hero
+   hacia abajo y suaviza el corte recto. */
+.services-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    display: block;
+    /* Evita un hueco de subpíxel entre Hero y la wave. */
+    margin-top: -1px;
+}
+
+/* El header de la sección queda por debajo de la wave: le damos margen
+   superior para que el texto no se solape con la curva. */
+.services-header {
+    position: relative;
+    margin-top: 1.5rem;
 }
 
 .services-header {

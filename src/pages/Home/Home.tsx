@@ -1,5 +1,6 @@
 import Hero from "./Hero";
 import Services from "./Services";
+import Stats from "./Stats";
 import Benefits from "./Benefits";
 
 function Home() {
@@ -7,6 +8,7 @@ function Home() {
         <>
             <Hero />
             <Services />
+            <Stats />
             <Benefits />
         </>
     );

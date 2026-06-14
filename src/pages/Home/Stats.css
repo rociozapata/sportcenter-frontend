@@ -1,0 +1,85 @@
+/* Franja angosta con fondo navy. Funciona como "puente" entre Services
+   (claro) y Benefits (claro), rompiendo el ritmo visual sin agregar otra
+   sección de contenido pesada.
+
+   Apilamos tres backgrounds:
+   1) Gradiente arriba: del color claro de las secciones vecinas (--neutral)
+      al navy. Ocupa solo los primeros 60px (la franja de transición).
+   2) Gradiente abajo: del navy al claro. Ocupa los últimos 60px.
+   3) Color sólido navy de fondo: rellena todo el medio.
+   Aumentamos el padding vertical para que el contenido (las cifras) no
+   caiga sobre las zonas degradadas. */
+.stats {
+    color: var(--neutral);
+    padding: 2.5rem 8%;
+    background-color: var(--primary);
+    /* Sombras suaves internas en el borde superior e inferior.
+       Hacen que la franja parezca "encajada" entre Services y Benefits
+       sin necesidad de gradientes. El valor negativo de spread (-8px)
+       contiene la sombra para que no se extienda a los costados. */
+    box-shadow:
+        inset 0 8px 12px -8px rgba(0, 0, 0, 0.35),
+        inset 0 -8px 12px -8px rgba(0, 0, 0, 0.35);
+}
+
+/* Lista en grid de 4 columnas en desktop. Reset de márgenes default de <dl>. */
+.stats-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+/* Cada item centrado: cifra arriba, label abajo. */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    /* Línea divisoria fina entre items, dejando el último sin línea.
+       Usamos border en vez de gap-con-líneas para que respete el grid. */
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0 1rem;
+}
+.stat-item:last-child {
+    border-right: none;
+}
+
+/* La cifra grande: la atracción visual de la franja. */
+.stat-value {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1;
+    /* Verde lima del sistema: contrasta fuerte sobre el navy y conecta
+       con el resto del branding (íconos de Benefits, CTA Reservar). */
+    color: var(--secondary);
+}
+
+.stat-label {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--neutral);
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+}
+
+/* Mobile: 2x2 en vez de 4x1, y ocultamos los bordes derechos verticales
+   porque con dos columnas quedaba feo. */
+@media (max-width: 768px) {
+    .stats {
+        padding: 2.5rem 5%;
+    }
+
+    .stats-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        border-right: none;
+        padding: 0;
+    }
+}
