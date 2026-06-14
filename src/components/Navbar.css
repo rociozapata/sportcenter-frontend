@@ -68,6 +68,97 @@
     align-items: center;
 }
 
+/* Perfil con dropdown e indicador de sesión */
+
+.navbar-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-profile-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.navbar-profile-trigger:hover {
+    background-color: #f1eef5;
+}
+
+.navbar-profile-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background-color: #22c55e;
+    border: 2px solid var(--neutral);
+    border-radius: 50%;
+}
+
+.navbar-profile-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background-color: var(--neutral);
+    border: 1px solid #e5e4e7;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.navbar-profile-header {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e4e7;
+    margin-bottom: 4px;
+}
+
+.navbar-profile-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.navbar-profile-email {
+    color: #6b6375;
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.navbar-profile-menu a,
+.navbar-profile-menu button {
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #2a2533;
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.navbar-profile-menu a:hover,
+.navbar-profile-menu button:hover {
+    background-color: #f1eef5;
+    text-decoration: none;
+}
+
 /* Navbar menu hamburguesa responsive celular*/
 
 .navbar-toggle {
