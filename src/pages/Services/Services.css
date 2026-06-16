@@ -1,10 +1,12 @@
 
-.services {
-    padding: 5rem 8%;
+.services-zigzag{
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    margin-top: 3rem;
     background-color: var(--neutral);
 
 }
-
 .services-header {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 800;
@@ -13,107 +15,163 @@
     letter-spacing: -0.02em;
 }
 
-.services-grid{
+.services-zigzag-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);  /* divide el espacio en 3 columnas iguales*/
-    grid-auto-rows: 260px;  /* alto obligatorio hacia abajo*/
-    gap: 1.5rem;  /* separacion de las tarjetas*/
+    grid-template-columns: 1fr 1fr;  /* Cada fila es un Grid de 2 columnas iguales (Foto | Texto) */
+    gap: 4rem;
+    align-items: center; /* Centra el texto verticalmente respecto a la foto */
+}
+
+/* El truco mágico: A las filas PARES (2, 4...) les damos vuelta el orden */
+.services-zigzag-row:nth-child(even) {
+    direction: rtl; /* Hace que el grid empiece a dibujar desde la derecha */
+}
+
+/* Restauramos la dirección del texto adentro del contenido par para que no se lea al revés */
+.services-zigzag-row:nth-child(even) .services-zigzag-content {
+    direction: ltr; /* Texto normal de izquierda a derecha */
+}
+
+.services-zigzag-img {
+    width: 100%;
+    height: 350px; /* Un buen alto para que luzca la disciplina */
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(10, 25, 41, 0.1);
+}
+
+.services-zigzag-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.services-zigzag-content {
+    padding: 1rem;
+}
+
+.services-zigzag-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.services-zigzag-description {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #798088;
+    margin-bottom: 2rem;
+}
+
+
+@media (max-width: 768px) {
+    .services-zigzag-row {
+        grid-template-columns: 1fr; /* Una sola columna */
+        gap: 1.5rem;
+    }
+
+    /* En el celular anulamos el giro de las filas pares para que mantengan el orden Foto -> Texto */
+    .services-zigzag-row:nth-child(even) {
+        direction: ltr;
+    }
+    
+    .services-zigzag-img{
+        height: 240px; /* Achicamos un toque la foto en el celu */
+    }
+}
+
+
+/* --- SECCIÓN STAFF --- */
+.staff-section {
+    margin-top: 6rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 4rem;
+}
+
+.staff-intro {
+    max-width: 800px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #4a5568;
     margin-bottom: 3rem;
 }
 
-.services-card {
-    position: relative; /* Clave: hace que el ::before y ::after se queden adentro de la tarjeta */
-    border-radius: 16px;
+/* Grilla inteligente: se acomoda a 3 columnas, pero centra los elementos de las filas incompletas */
+.staff-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales por fila */
+    gap: 2rem; /* Un poco más de aire entre profes */
+    justify-content: center;
+}
+
+/* Tarjeta del Profe (Diseño de bloques: Foto arriba, texto abajo) */
+.staff-card {
+    display: flex;
+    flex-direction: column; /* Hace que el contenido se apile verticalmente */
+    height: 380px; /* Le damos un poco más de alto total */
+    border-radius: 12px;
     overflow: hidden;
-    background-color: #1e2a3a;
-    color: #ffffff;
+    background-color: #1e2a3a; /* Fondo oscuro del complejo para el texto */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 12px rgba(10, 25, 41, 0.08);
 }
 
-.services-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(10, 25, 41, 0.18);
+/* Contenedor de la foto: ahora ocupa el 75% de la tarjeta */
+.staff-card-img {
+    position: relative;
+    width: 100%;
+    height: 80%; 
+    overflow: hidden;
 }
 
-.services-card--wide{
-    grid-column: span 2; /* Esta tarjeta ocupa 2 de las 3 columnas disponibles */
+.staff-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    transition: transform 0.4s ease;
 }
 
-.services-card--narrow {
-    grid-column: span 1; /* Esta tarjeta ocupa solo 1 columna */
+/* Bloque de texto: ahora vive ABAJO de la foto, sobre fondo oscuro sólido */
+.staff-card-info {
+    width: 100%;
+    height: 20%; /* Ocupa el espacio restante */
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el texto verticalmente en su cajita */
+    background-color: #1e2a3a; 
+    z-index: 2;
 }
 
-/* contenedor vacio pegado al fondo, se transforma al pasar el mouse (hover::after) */
-.services-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: var(--bg-image);
-    background-size: cover;
-    background-position: center;
-    z-index: 0; /* Capa del fondo */
-    transition: transform 0.6s ease;
+.staff-card-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff; /* Letras blancas sobre el fondo oscuro */
+    margin: 0 0 0.15rem 0;
 }
 
-.services-card:hover::after {
-    transform: scale(1.08); /* Hace el zoom de la foto en hover */
+.staff-card-role {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b8e00; /* Tu verde deportivo para destacar la disciplina */
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* degradado negro transparente paraque se vea el texto  */
-.services-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(10, 25, 41, 0.85) 0%, rgba(10, 25, 41, 0) 100%);
-    z-index: 1; /* Por encima de la foto, por debajo del texto */
-}
-
-.services-card-content {
-    position: absolute;
-    bottom: 0; /* Pegado abajo */
-    left: 0;
-    right: 0;
-    padding: 1.75rem;
-    z-index: 2; /* Por encima de todo lo demás */
-}
-
-.services-card-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem 0;
-}
-
-.services-card-description {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #c5d1e0;
-    margin: 0 0 1rem 0;
-}
-
-.services-card--tennis {
-    --bg-image: url('/src/assets/service-tenis.jpg');
-}
-
-.services-card--padel {
-    --bg-image: url('/src/assets/service-padel.jpg');
-}
-
-.services-card--funcional {
-    --bg-image: url('/src/assets/service-funcional.jpg');
-}
-
-.services-card--crossfit {
-    --bg-image: url('/src/assets/service-crossfit.jpg');
-}
-
-
+/* --- RESPONSIVO --- */
 @media (max-width: 900px) {
-    .services-grid {
-        grid-template-columns: 1fr; /* Pasa a tener 1 sola columna */
+    .staff-grid {
+        grid-template-columns: repeat(2, 1fr); /* En tablet se ven de a 2 */
     }
-    .services-card--wide, .services-card--narrow {
-        grid-column: span 1; /* Todas miden 1 columna */
+}
+
+@media (max-width: 550px) {
+    .staff-grid {
+        grid-template-columns: 1fr; /* En celu, 1 por fila */
     }
 }
