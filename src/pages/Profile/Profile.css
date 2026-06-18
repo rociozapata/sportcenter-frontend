@@ -17,9 +17,7 @@
     padding-bottom: 0.5rem;
 }
 
-/* ==========================================================================
-   BLOQUE A: CABECERA (Flexbox para Nombre + Botón)
-   ========================================================================== */
+/* Perfil header */
 .profile-header-block {
     display: flex;
     justify-content: space-between;
@@ -81,9 +79,7 @@
     box-shadow: 0 0 15px rgba(107, 142, 0, 0.5);
 }
 
-/* ==========================================================================
-   BLOQUE B: ESTADÍSTICAS (Grid de 4 columnas)
-   ========================================================================== */
+/* Estadisticas */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -125,9 +121,7 @@
     color: #ffffff;
 }
 
-/* ==========================================================================
-   BLOQUES C y D: TURNOS Y HISTORIAL (Flexbox para Filas)
-   ========================================================================== */
+/* Turnos e historial */
 .bookings-list {
     display: flex;
     flex-direction: column;
@@ -157,7 +151,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Etiqueta del deporte (Pádel, Tenis, etc.) */
+/* Etiqueta del deporte  */
 .booking-badge {
     background-color: #6b8e00;
     color: var(--neutral);
@@ -211,7 +205,7 @@
     color: #ffffff;
 }
 
-/* Etiquetas de Estado (Historial) - Aquí usamos los SPANs */
+/* Etiquetas de Estado (Historial)  */
 .history-status {
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -231,9 +225,7 @@
     color: #ff4444; /* Rojo neón */
 }
 
-/* ==========================================================================
-   RESPONSIVO (Celu y Tablet)
-   ========================================================================== */
+/* Responsive */
 @media (max-width: 900px) {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablet */
