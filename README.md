@@ -59,7 +59,22 @@ src/
 │   └── Admin/
 └── services/                # Lógica que habla con la API
     ├── api.ts               # URL base y clave del localStorage
-    └── auth.ts              # login, register, getCurrentUser, logout
+    ├── auth.ts              # login, register, getCurrentUser, logout
+    └── admin.ts             # CRUD de usuarios, servicios, profesionales y turnos
+```
+
+Dentro de `pages/Admin/` la organización es:
+
+```
+Admin/
+├── AdminLayout.tsx          # Sidebar + <Outlet/> con la sub-ruta activa
+├── ProtectedAdminRoute.tsx  # Guard: verifica role === "ADMIN" antes de montar
+├── Dashboard.tsx            # Tarjetas con totales (usuarios, servicios, etc.)
+├── Users.tsx                # Lista paginada + cambio de rol + baja
+├── Services.tsx             # ABM de tipos de servicio
+├── Professionals.tsx        # ABM de profesionales (con multi-select de servicios)
+├── Appointments.tsx         # Listado con filtros + confirmar/cancelar/eliminar
+└── Admin.css                # Layout, tablas, forms, métricas, badges
 ```
 
 **Regla simple:** las páginas (`pages/`) **nunca** llaman a `fetch` directo. Siempre van a través de una función del `services/`. Así, si mañana cambia la URL o agregamos un interceptor, se toca un solo archivo.
@@ -76,11 +91,33 @@ Toda la comunicación con el back vive en [src/services/auth.ts](src/services/au
 
 ### Endpoints usados hoy
 
+#### Públicos / autenticación
+
 | Método | Endpoint | Para qué |
 |---|---|---|
 | `POST` | `/auth/login` | Iniciar sesión, obtener token. |
 | `POST` | `/users` | Crear una cuenta nueva. |
 | `GET`  | `/auth/me` | Datos del usuario logueado (usa el token). |
+
+#### Panel de administración (solo ADMIN, requieren `Bearer <token>`)
+
+| Método | Endpoint | Para qué |
+|---|---|---|
+| `GET`    | `/users?page&size`            | Listar usuarios paginados. |
+| `PATCH`  | `/users/{id}/role`            | Cambiar el rol de un usuario. |
+| `DELETE` | `/users/{id}`                 | Eliminar un usuario. |
+| `GET`    | `/service-types?page&size`    | Listar tipos de servicio. |
+| `POST`   | `/service-types`              | Crear un tipo de servicio. |
+| `PUT`    | `/service-types/{id}`         | Editar un tipo de servicio. |
+| `DELETE` | `/service-types/{id}`         | Eliminar un tipo de servicio. |
+| `GET`    | `/professionals?page&size`    | Listar profesionales. |
+| `POST`   | `/professionals`              | Crear profesional. |
+| `PUT`    | `/professionals/{id}`         | Editar profesional. |
+| `DELETE` | `/professionals/{id}`         | Eliminar profesional. |
+| `GET`    | `/appointments?status&...`    | Listar turnos con filtros. |
+| `PATCH`  | `/appointments/{id}/confirm`  | Confirmar un turno pendiente. |
+| `PATCH`  | `/appointments/{id}/cancel`   | Cancelar un turno. |
+| `DELETE` | `/appointments/{id}`          | Eliminar un turno. |
 
 ---
 
@@ -207,6 +244,68 @@ Cualquier pantalla que necesite saber quién está logueado (ej. Perfil) tiene q
 
 ---
 
+### Flujo: Panel de administración
+
+Cuando un usuario navega a `/admin/*`, React Router monta el guard antes del contenido. La secuencia es:
+
+```
+[Usuario]        [App.tsx Routes]    [ProtectedAdminRoute]   [auth.ts]      [API Spring]
+   │                    │                     │                  │                │
+   │ 1. va a /admin/x   │                     │                  │                │
+   │───────────────────▶│                     │                  │                │
+   │                    │ 2. matchea /admin   │                  │                │
+   │                    │    monta Protected  │                  │                │
+   │                    │────────────────────▶│                  │                │
+   │                    │                     │ 3. ¿hay token?   │                │
+   │                    │                     │    No → denied   │                │
+   │                    │                     │    Si → loading  │                │
+   │                    │                     │ 4. getCurrentUser│                │
+   │                    │                     │─────────────────▶│                │
+   │                    │                     │                  │ 5. GET /auth/me│
+   │                    │                     │                  │───────────────▶│
+   │                    │                     │                  │ 6. {role,...}  │
+   │                    │                     │                  │◀───────────────│
+   │                    │                     │ 7. role==="ADMIN"│                │
+   │                    │                     │    ? ok : denied │                │
+   │                    │                     │                  │                │
+   │                    │                     │ ──── si DENIED ──────────────────▶│
+   │                    │                     │ <Navigate to=/login replace />    │
+   │                    │                     │                  │                │
+   │                    │                     │ ──── si OK ──────────────────────▶│
+   │                    │                     │ render <AdminLayout>              │
+   │                    │                     │   <Outlet/> = Dashboard/Users/... │
+   │ 8. ve el panel     │                     │                  │                │
+   │◀───────────────────│─────────────────────│                  │                │
+```
+
+Una vez dentro del panel, cada sección hace su propio fetch a través de [src/services/admin.ts](src/services/admin.ts). El helper interno `authFetch` agrega automáticamente el `Authorization: Bearer <token>` a cada request, así los componentes no manipulan el token a mano.
+
+**Acciones por sección:**
+
+| Sección | URL | Acciones |
+|---|---|---|
+| Dashboard      | `/admin`               | Lectura de totales (4 fetchs paralelos con `size=1`). |
+| Usuarios       | `/admin/usuarios`      | Cambiar rol (PATCH), eliminar (DELETE). |
+| Servicios      | `/admin/servicios`     | ABM completo (POST/PUT/DELETE). |
+| Profesionales  | `/admin/profesionales` | ABM completo + relación N-a-N con servicios. |
+| Turnos         | `/admin/turnos`        | Confirmar, cancelar y eliminar. Filtro por estado. |
+
+**Detalles de implementación clave:**
+
+- El primer admin del sistema se crea desde la base de datos: registrate por la UI y después corré `UPDATE users SET role = 'ADMIN' WHERE email = '...';`.
+- Las tablas usan un patrón de **patch local** después de cada acción: en vez de re-fetchear la página completa, el back devuelve el item actualizado y el front lo reemplaza en el array. Más rápido y mantiene scroll/foco.
+- Las acciones por fila se trackean con un `Set<number>` de IDs ocupados, así el spinner/disabled solo afecta a la fila tocada, no a toda la tabla.
+- Los formularios de ABM usan un truco para representar tres estados con una sola variable `editingId`: `null` (form cerrado), `0` (creando), `>0` (editando ese id).
+- El filtro de turnos por estado dispara un re-fetch automático vía `useEffect` con dependencia en `[page, statusFilter]`.
+
+**Archivos involucrados:**
+- [src/App.tsx](src/App.tsx) — declara las rutas anidadas bajo `/admin`.
+- [src/pages/Admin/ProtectedAdminRoute.tsx](src/pages/Admin/ProtectedAdminRoute.tsx) — guard de rol.
+- [src/pages/Admin/AdminLayout.tsx](src/pages/Admin/AdminLayout.tsx) — sidebar y `<Outlet/>`.
+- [src/services/admin.ts](src/services/admin.ts) — todas las llamadas al back.
+
+---
+
 ## Próximos flujos a documentar
 
 A medida que vayamos sumando funcionalidad, este README se actualiza con el diagrama correspondiente:
@@ -216,4 +315,4 @@ A medida que vayamos sumando funcionalidad, este README se actualiza con el diag
 - [ ] Listar servicios disponibles.
 - [ ] Reservar un turno.
 - [ ] Ver mis turnos.
-- [ ] Panel de admin (gestión de usuarios y roles).
+- [x] Panel de admin (gestión de usuarios y roles).

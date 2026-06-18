@@ -1,43 +1,72 @@
 /* ============================================================
    Panel de administración
-   Layout: sidebar fijo a la izquierda + contenido a la derecha.
+   ------------------------------------------------------------
+   Organización del archivo:
+     1. Layout general (grid sidebar + contenido)
+     2. Sidebar y navegación
+     3. Contenedor de contenido y cabeceras
+     4. Mensajes de estado (loading / error / vacío)
+     5. Tablas y acciones de fila
+     6. Formularios (inputs, checkboxes, multi-select)
+     7. Métricas del dashboard
+     8. Filtros y badges de estado (turnos)
+     9. Paginación
+    10. Responsive
    ============================================================ */
 
+/* ----- 1. Layout general --------------------------------------------- */
+
+/* Grid de dos columnas: sidebar de 240px + el resto para el contenido.
+   min-height = viewport menos navbar y footer (140px aproximados),
+   así el panel siempre ocupa al menos la altura visible.
+   color-scheme: light fuerza al browser a usar widgets nativos
+   (selects, scrollbars) en versión clara, sin importar la preferencia
+   del SO. Si no, en dark mode los <select> se pintaban oscuros y
+   chocaban con nuestras superficies blancas. */
 .admin-layout {
     display: grid;
     grid-template-columns: 240px 1fr;
     min-height: calc(100vh - 140px);
     gap: 0;
-    /* Forzamos esquema claro: pintamos superficies en blanco/gris claro,
-       sin esto el dark mode global vuelve invisibles los títulos. */
     color-scheme: light;
     color: #1a202c;
 }
 
+/* Pintamos TODOS los títulos del panel en navy (--primary).
+   Necesario porque index.css define `h1, h2, ... { color: var(--text-h) }`
+   global, y queremos que en el panel sean del color de marca. */
 .admin-layout h1,
 .admin-layout h2,
 .admin-layout h3 {
     color: var(--primary);
 }
 
+/* ----- 2. Sidebar y navegación --------------------------------------- */
+
+/* Sidebar: fondo navy con texto claro. Contrasta con el contenido. */
 .admin-sidebar {
     background-color: var(--primary);
     color: var(--neutral);
     padding: 24px 16px;
 }
 
+/* El título "Administración" del sidebar debe quedar BLANCO sobre
+   navy. Como la regla de arriba (.admin-layout h2) lo pone navy,
+   acá usamos !important para que gane. */
 .admin-sidebar-title {
     font-size: 1.1rem;
     margin: 0 0 16px 4px;
     color: var(--neutral) !important;
 }
 
+/* Lista vertical de links. */
 .admin-nav {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
+/* Cada link de la sidebar. transition suaviza el hover. */
 .admin-nav-link {
     color: var(--neutral);
     text-decoration: none;
@@ -47,21 +76,29 @@
     transition: background-color 0.15s;
 }
 
+/* Hover sutil: un blanco translúcido encima del navy. */
 .admin-nav-link:hover {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* La clase "active" la pone NavLink automáticamente cuando el link
+   matchea la URL actual. Pintamos en verde lima para que se vea
+   bien dónde estamos parados. */
 .admin-nav-link.active {
     background-color: var(--secondary);
     color: var(--primary);
 }
 
+/* ----- 3. Contenedor de contenido y cabeceras ------------------------ */
+
+/* La columna derecha donde se renderiza la página activa. */
 .admin-content {
     padding: 32px;
     background-color: #f7fafc;
     color: #1a202c;
 }
 
+/* Cabecera de cada panel (h1 + acciones a la derecha). */
 .admin-panel-header {
     display: flex;
     align-items: baseline;
@@ -70,11 +107,15 @@
     margin-bottom: 20px;
 }
 
+/* Texto chico de metadata: "12 en total · página 1 de 3". */
 .admin-meta {
     color: #4a5568;
     font-size: 0.9rem;
 }
 
+/* ----- 4. Mensajes de estado ----------------------------------------- */
+
+/* Estilos compartidos para "Cargando", "Error" y "Sin datos". */
 .admin-loading,
 .admin-error,
 .admin-empty {
@@ -82,10 +123,16 @@
     color: #4a5568;
 }
 
+/* El error se distingue en rojo. */
 .admin-error {
     color: #c53030;
 }
 
+/* ----- 5. Tablas y acciones de fila ---------------------------------- */
+
+/* Tabla con bordes colapsados, fondo blanco y sombra suave para
+   despegarla del fondo gris. overflow:hidden + border-radius da
+   esquinas redondeadas que recortan los headers. */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
@@ -95,6 +142,7 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Padding y borde inferior compartido por th/td. */
 .admin-table th,
 .admin-table td {
     text-align: left;
@@ -103,16 +151,19 @@
     font-size: 0.95rem;
 }
 
+/* Headers: fondo gris claro y texto navy. */
 .admin-table th {
     background: #edf2f7;
     color: var(--primary);
     font-weight: 600;
 }
 
+/* La última fila no necesita borde (queda dentro del border-radius). */
 .admin-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+/* Selects dentro de la tabla (ej. cambiar rol). */
 .admin-table select {
     padding: 6px 8px;
     border-radius: 6px;
@@ -121,26 +172,34 @@
     font: inherit;
 }
 
+/* Botones más chicos para las acciones por fila (vs los CTA grandes). */
 .admin-row-action {
     padding: 6px 12px;
     font-size: 0.85rem;
     border-radius: 14px;
 }
 
+/* Botón rojo de "Eliminar". Lo agregamos acá porque buttons.css
+   no incluía variante danger (solo icon-btn-danger). */
 .btn-danger {
     background-color: #E53E3E;
     color: var(--neutral);
 }
-
 .btn-danger:hover:not(:disabled) {
     background-color: #c53030;
 }
 
+/* Contenedor flex para los varios botones por fila (Editar+Eliminar). */
 .admin-row-actions {
     display: flex;
     gap: 8px;
 }
 
+/* ----- 6. Formularios ------------------------------------------------- */
+
+/* Form embebido arriba de la tabla. Mismo estilo de "card" que la
+   tabla (fondo blanco, sombra) para que ambos elementos se sientan
+   parte de la misma sección. */
 .admin-form {
     background: #fff;
     padding: 20px;
@@ -157,6 +216,7 @@
     font-size: 1.1rem;
 }
 
+/* Labels arriba de cada input, con margen para separarlos. */
 .admin-form label {
     font-size: 0.85rem;
     font-weight: 600;
@@ -164,6 +224,7 @@
     margin-top: 8px;
 }
 
+/* Inputs con borde gris, redondeados. */
 .admin-form input {
     padding: 8px 10px;
     border-radius: 6px;
@@ -171,6 +232,8 @@
     font: inherit;
 }
 
+/* Variante de label INLINE: para labels que envuelven un checkbox
+   y el texto. Anula el margin-top y queda en línea con el check. */
 .admin-form-inline {
     display: inline-flex;
     align-items: center;
@@ -180,11 +243,15 @@
     margin-top: 0;
 }
 
+/* Que el checkbox no estire al ancho completo del grid (override
+   del estilo de input genérico). */
 .admin-form-inline input[type="checkbox"] {
     width: auto;
     margin: 0;
 }
 
+/* Grupo de checkboxes en filas (servicios que atiende un profesional).
+   flex-wrap permite que rompa en varias líneas si hay muchos. */
 .admin-checkbox-group {
     display: flex;
     flex-wrap: wrap;
@@ -192,6 +259,7 @@
     padding: 8px 0;
 }
 
+/* Botones de acción del form alineados a la derecha. */
 .admin-form-actions {
     display: flex;
     gap: 8px;
@@ -199,6 +267,10 @@
     margin-top: 12px;
 }
 
+/* ----- 7. Métricas del dashboard ------------------------------------- */
+
+/* Grilla responsiva: tantas columnas como entren con un mínimo
+   de 180px cada una. auto-fit aplana columnas vacías. */
 .admin-metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -206,6 +278,7 @@
     margin-top: 20px;
 }
 
+/* Tarjeta individual. Cada métrica es un valor + un label. */
 .admin-metric {
     background: #fff;
     border-radius: 8px;
@@ -216,26 +289,34 @@
     gap: 6px;
 }
 
+/* Número grande, navy. */
 .admin-metric-value {
     font-size: 2rem;
     font-weight: 700;
     color: var(--primary);
 }
 
+/* Texto debajo del número, gris. */
 .admin-metric-label {
     font-size: 0.9rem;
     color: #4a5568;
 }
 
+/* Variante "destacada": fondo verde lima.
+   La usamos para "Turnos pendientes" así el admin lo ve al toque. */
 .admin-metric-highlight {
     background: var(--secondary);
 }
 
+/* Sobre el fondo lima los colores cambian para mantener contraste. */
 .admin-metric-highlight .admin-metric-value,
 .admin-metric-highlight .admin-metric-label {
     color: var(--primary);
 }
 
+/* ----- 8. Filtros y badges de estado (turnos) ------------------------ */
+
+/* Filtros en la cabecera (ej. selector de estado en /turnos). */
 .admin-filters {
     display: inline-flex;
     align-items: center;
@@ -252,6 +333,8 @@
     font: inherit;
 }
 
+/* Badge base de status: una "pill" pequeña con texto en mayúsculas.
+   Las variantes (-pending/-confirmed/-cancelled) solo cambian el color. */
 .admin-status {
     display: inline-block;
     padding: 2px 10px;
@@ -262,10 +345,15 @@
     letter-spacing: 0.03em;
 }
 
+/* Colores accesibles (texto oscuro sobre fondo pastel).
+   pending → amarillo, confirmed → verde, cancelled → rojo. */
 .admin-status-pending   { background: #fefcbf; color: #744210; }
 .admin-status-confirmed { background: #c6f6d5; color: #22543d; }
 .admin-status-cancelled { background: #fed7d7; color: #742a2a; }
 
+/* ----- 9. Paginación ------------------------------------------------- */
+
+/* Botones Anterior/Siguiente alineados a la derecha. */
 .admin-pagination {
     display: flex;
     gap: 8px;
@@ -273,6 +361,10 @@
     margin-top: 16px;
 }
 
+/* ----- 10. Responsive ------------------------------------------------ */
+
+/* En mobile colapsamos la sidebar arriba del contenido (1 columna),
+   y los links de la sidebar se acomodan en fila para no comer altura. */
 @media (max-width: 768px) {
     .admin-layout {
         grid-template-columns: 1fr;

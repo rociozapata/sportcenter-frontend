@@ -1,5 +1,19 @@
-// Sección ABM de tipos de servicio (clases/servicios del sportcenter).
+// ============================================================
+// Services (sección /admin/servicios)
+// ------------------------------------------------------------
+// ABM de tipos de servicio (clases/servicios del sportcenter).
+// Misma estructura base que Users + un formulario embebido para
+// crear y editar.
+//
+// Truco para representar 3 estados del formulario con una sola
+// variable (editingId):
+//   - null  → no hay form visible
+//   -    0  → estamos CREANDO uno nuevo
+//   -  > 0  → estamos EDITANDO ese id
+// ============================================================
+
 import { useEffect, useState, type FormEvent } from "react";
+
 import {
   createServiceType,
   deleteServiceType,
@@ -12,20 +26,28 @@ import {
 
 const PAGE_SIZE = 10;
 
-// Form vacío para reusar al cancelar/crear de nuevo.
+// Form "limpio" para reusar al cancelar o al empezar a crear de cero.
+// Mantener este objeto como constante evita armar { ... } en varios lugares.
 const EMPTY_FORM: ServiceTypePayload = { name: "", durationMinutes: 60, price: 0 };
 
 function Services() {
+  // Estado de la lista (igual que en Users).
   const [data, setData] = useState<PageResponse<ServiceType> | null>(null);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // null = no estamos editando; 0 = creando uno nuevo; >0 = editando ese id.
+  // Estado del formulario.
+  // editingId controla la visibilidad y el "modo" (crear vs editar).
   const [editingId, setEditingId] = useState<number | null>(null);
+  // form contiene los valores actuales de los inputs.
   const [form, setForm] = useState<ServiceTypePayload>(EMPTY_FORM);
+  // saving: deshabilita el botón mientras se procesa el submit.
   const [saving, setSaving] = useState(false);
+  // Set de filas con acciones en vuelo (igual que en Users).
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
+
+  // ------ Carga de la lista --------------------------------------------
 
   async function load(targetPage: number) {
     setLoading(true);
@@ -44,11 +66,15 @@ function Services() {
     load(page);
   }, [page]);
 
+  // ------ Handlers del formulario --------------------------------------
+
+  // Abre el form en modo "crear" con valores por defecto.
   function startCreate() {
     setEditingId(0);
     setForm(EMPTY_FORM);
   }
 
+  // Abre el form en modo "editar" precargado con el servicio elegido.
   function startEdit(service: ServiceType) {
     setEditingId(service.id);
     setForm({
@@ -58,28 +84,35 @@ function Services() {
     });
   }
 
+  // Cierra el form y limpia los valores.
   function cancelEdit() {
     setEditingId(null);
     setForm(EMPTY_FORM);
   }
 
+  // Submit del form: decide entre create o update según editingId.
   async function handleSubmit(e: FormEvent) {
+    // Evita el comportamiento default del browser (recargar la página).
     e.preventDefault();
     setSaving(true);
     try {
       if (editingId && editingId > 0) {
+        // Modo edición: id > 0 → PUT
         await updateServiceType(editingId, form);
       } else {
+        // Modo creación: id === 0 → POST
         await createServiceType(form);
       }
-      cancelEdit();
-      await load(page);
+      cancelEdit();        // cerramos el form
+      await load(page);    // refrescamos la tabla
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo guardar");
     } finally {
       setSaving(false);
     }
   }
+
+  // ------ Acciones de filas --------------------------------------------
 
   function setBusy(id: number, busy: boolean) {
     setBusyIds((prev) => {
@@ -95,6 +128,7 @@ function Services() {
     setBusy(service.id, true);
     try {
       await deleteServiceType(service.id);
+      // Misma lógica que en Users: si vaciamos la página, retrocedemos.
       const remaining = (data?.content.length ?? 1) - 1;
       if (remaining === 0 && page > 0) setPage(page - 1);
       else await load(page);
@@ -105,15 +139,21 @@ function Services() {
     }
   }
 
+  // ------ Render --------------------------------------------------------
+
   return (
     <div className="admin-panel">
       <header className="admin-panel-header">
         <h1>Servicios</h1>
+        {/* Botón que abre el form en modo "crear". */}
         <button type="button" className="btn btn-primary" onClick={startCreate}>
           Nuevo servicio
         </button>
       </header>
 
+      {/* El form se renderiza solo cuando editingId !== null.
+          Si lo dejáramos siempre montado, mantendría su estado entre
+          aperturas y se vería texto viejo al volver a abrir. */}
       {editingId !== null && (
         <form className="admin-form" onSubmit={handleSubmit}>
           <h2>{editingId === 0 ? "Nuevo servicio" : `Editar servicio #${editingId}`}</h2>
@@ -124,8 +164,8 @@ function Services() {
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            minLength={3}
-            maxLength={80}
+            minLength={3}     // refleja la validación @Size(min=3) del back
+            maxLength={80}    // refleja @Size(max=80)
             required
           />
 
@@ -134,6 +174,9 @@ function Services() {
             id="svc-duration"
             type="number"
             value={form.durationMinutes}
+            // Number(e.target.value) convierte el string del input
+            // a número. Si está vacío queda NaN, pero `required` evita
+            // que el form se envíe en ese caso.
             onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
             min={1}
             max={480}
@@ -144,7 +187,7 @@ function Services() {
           <input
             id="svc-price"
             type="number"
-            step="0.01"
+            step="0.01"  // permite decimales (precio con centavos)
             value={form.price}
             onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
             min={0}
@@ -190,6 +233,7 @@ function Services() {
                     <td>{service.id}</td>
                     <td>{service.name}</td>
                     <td>{service.durationMinutes} min</td>
+                    {/* toFixed(2) garantiza siempre dos decimales en la UI. */}
                     <td>${Number(service.price).toFixed(2)}</td>
                     <td className="admin-row-actions">
                       <button

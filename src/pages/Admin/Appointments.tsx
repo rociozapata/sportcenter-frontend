@@ -1,5 +1,20 @@
-// Listado de turnos con filtros y acciones admin.
+// ============================================================
+// Appointments (sección /admin/turnos)
+// ------------------------------------------------------------
+// Listado de turnos con:
+//   - Filtro por estado (Pendiente / Confirmado / Cancelado).
+//   - Acciones contextuales por fila (depende del estado actual):
+//       * Confirmar: solo si está PENDING.
+//       * Cancelar:  cualquier estado distinto a CANCELLED.
+//       * Eliminar:  siempre.
+//
+// La diferencia con las otras secciones es que no hay ABM completo:
+// los turnos se crean desde la web pública (/turnos), acá solo
+// administramos los existentes.
+// ============================================================
+
 import { useEffect, useState } from "react";
+
 import {
   cancelAppointment,
   confirmAppointment,
@@ -10,13 +25,20 @@ import {
   type PageResponse,
 } from "../../services/admin";
 
+// Pedimos más por página acá porque la grilla tiene mucha info.
 const PAGE_SIZE = 15;
 
+// ----- Helpers de presentación -----------------------------------------
+
+// Formatea un ISO datetime al formato de la locale del usuario.
+// Date(string ISO) lo entiende. toLocaleString agrega fecha y hora.
 function formatDateTime(value: string): string {
   const d = new Date(value);
   return d.toLocaleString();
 }
 
+// Traduce el enum del back a texto legible en español.
+// Sale más limpio acá que con un { PENDING: "Pendiente", ... } inline.
 function statusLabel(status: AppointmentStatus): string {
   if (status === "PENDING") return "Pendiente";
   if (status === "CONFIRMED") return "Confirmado";
@@ -24,17 +46,26 @@ function statusLabel(status: AppointmentStatus): string {
 }
 
 function Appointments() {
+  // ------ Estado --------------------------------------------------------
+
   const [data, setData] = useState<PageResponse<Appointment> | null>(null);
   const [page, setPage] = useState(0);
+
+  // "" significa "sin filtro" (mostrar todos). Si fuera AppointmentStatus
+  // tendríamos que elegir un default arbitrario, no nos sirve.
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "">("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
+
+  // ------ Carga ---------------------------------------------------------
 
   async function load(targetPage: number, status: AppointmentStatus | "") {
     setLoading(true);
     setError(null);
     try {
+      // Si status es "" no pasamos el filtro (el service lo trata como undefined).
       const response = await getAppointments(targetPage, PAGE_SIZE, {
         status: status || undefined,
       });
@@ -46,9 +77,13 @@ function Appointments() {
     }
   }
 
+  // Re-cargar cuando cambia la página O el filtro de estado.
+  // React diff a las deps: si cualquiera cambia, vuelve a correr el effect.
   useEffect(() => {
     load(page, statusFilter);
   }, [page, statusFilter]);
+
+  // ------ Helpers de estado --------------------------------------------
 
   function setBusy(id: number, busy: boolean) {
     setBusyIds((prev) => {
@@ -59,12 +94,16 @@ function Appointments() {
     });
   }
 
+  // Patch local: reemplaza el item por la versión actualizada que vino del back.
+  // Nos ahorra un re-fetch de toda la página.
   function patchInList(updated: Appointment) {
     setData((prev) => prev && {
       ...prev,
       content: prev.content.map((a) => (a.id === updated.id ? updated : a)),
     });
   }
+
+  // ------ Acciones ------------------------------------------------------
 
   async function handleConfirm(appt: Appointment) {
     setBusy(appt.id, true);
@@ -105,10 +144,15 @@ function Appointments() {
     }
   }
 
+  // ------ Render --------------------------------------------------------
+
   return (
     <div className="admin-panel">
       <header className="admin-panel-header">
         <h1>Turnos</h1>
+
+        {/* Selector de filtro. Al cambiar reseteamos `page` a 0
+            porque la "página 5 de pendientes" no existe en "todos". */}
         <div className="admin-filters">
           <label htmlFor="appt-status">Estado:</label>
           <select
@@ -162,11 +206,16 @@ function Appointments() {
                     <td>{appt.professionalName}</td>
                     <td>{appt.serviceTypeName}</td>
                     <td>
+                      {/* Badge con color según el estado. La clase
+                          dinámica `admin-status-${...}` matchea las
+                          variantes del CSS. */}
                       <span className={`admin-status admin-status-${appt.status.toLowerCase()}`}>
                         {statusLabel(appt.status)}
                       </span>
                     </td>
                     <td className="admin-row-actions">
+                      {/* Acciones contextuales: cada botón solo aparece
+                          si la acción tiene sentido para el estado actual. */}
                       {appt.status === "PENDING" && (
                         <button
                           type="button"

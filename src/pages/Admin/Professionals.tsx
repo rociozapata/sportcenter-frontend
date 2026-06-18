@@ -1,11 +1,18 @@
-// ABM de profesionales. Reusa el mismo patrón que Services pero con
-// un multi-select de tipos de servicio.
+// ============================================================
+// Professionals (sección /admin/profesionales)
+// ------------------------------------------------------------
+// ABM de profesionales. Mismo patrón que Services + un selector
+// multi-checkbox para asignarle al profesional qué tipos de
+// servicio puede atender (relación N-a-N en el back).
+// ============================================================
+
 import { useEffect, useState, type FormEvent } from "react";
+
 import {
   createProfessional,
   deleteProfessional,
   getProfessionals,
-  getServiceTypes,
+  getServiceTypes,           // lo necesitamos para poblar el selector
   updateProfessional,
   type PageResponse,
   type Professional,
@@ -15,24 +22,36 @@ import {
 
 const PAGE_SIZE = 10;
 
+// Form vacío por defecto.
+// active arranca en true: lo normal al crear un profesional es darlo
+// de alta activo. El usuario lo puede desactivar luego.
 const EMPTY_FORM: ProfessionalPayload = {
   name: "",
   speciality: "",
   active: true,
-  serviceTypeIds: [],
+  serviceTypeIds: [], // array vacío = no atiende nada todavía
 };
 
 function Professionals() {
+  // ------ Estado --------------------------------------------------------
+
   const [data, setData] = useState<PageResponse<Professional> | null>(null);
+
+  // Catálogo de tipos de servicio para alimentar los checkboxes del form.
+  // Lo cargamos una sola vez al montar (no por página).
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Estado del form (igual que en Services).
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ProfessionalPayload>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
+
+  // ------ Carga de la lista de profesionales ---------------------------
 
   async function load(targetPage: number) {
     setLoading(true);
@@ -51,19 +70,27 @@ function Professionals() {
     load(page);
   }, [page]);
 
-  // Cargamos los tipos de servicio una sola vez para alimentar el selector
-  // del form. 100 alcanza de sobra para un sportcenter realista.
+  // ------ Carga del catálogo de servicios ------------------------------
+
+  // Lo hacemos UNA SOLA VEZ al montar (dependencia []) porque cambia
+  // poco. Pedimos size=100 para tener todos en un solo fetch; alcanza
+  // para un sportcenter real. Si tu app crece, podrías pasar a un
+  // <autocomplete> con búsqueda.
   useEffect(() => {
     getServiceTypes(0, 100)
       .then((res) => setServiceTypes(res.content))
-      .catch(() => setServiceTypes([]));
+      .catch(() => setServiceTypes([])); // si falla, dejamos vacío
   }, []);
+
+  // ------ Handlers del formulario --------------------------------------
 
   function startCreate() {
     setEditingId(0);
     setForm(EMPTY_FORM);
   }
 
+  // Al editar precargamos todo, incluido el array de ids de servicios
+  // (lo derivamos de pro.services).
   function startEdit(pro: Professional) {
     setEditingId(pro.id);
     setForm({
@@ -79,14 +106,16 @@ function Professionals() {
     setForm(EMPTY_FORM);
   }
 
+  // Toggle de pertenencia: si el id está, lo saca; si no, lo agrega.
+  // Patrón clásico para multi-select con checkboxes.
   function toggleService(id: number) {
     setForm((prev) => {
       const has = prev.serviceTypeIds.includes(id);
       return {
         ...prev,
         serviceTypeIds: has
-          ? prev.serviceTypeIds.filter((x) => x !== id)
-          : [...prev.serviceTypeIds, id],
+          ? prev.serviceTypeIds.filter((x) => x !== id) // sacarlo
+          : [...prev.serviceTypeIds, id],               // agregarlo
       };
     });
   }
@@ -133,6 +162,8 @@ function Professionals() {
     }
   }
 
+  // ------ Render --------------------------------------------------------
+
   return (
     <div className="admin-panel">
       <header className="admin-panel-header">
@@ -168,6 +199,8 @@ function Professionals() {
             required
           />
 
+          {/* Checkbox de "Activo". El label envuelve al input para que
+              hacer click en el texto también lo togglee. */}
           <label className="admin-form-inline">
             <input
               type="checkbox"
@@ -178,6 +211,9 @@ function Professionals() {
           </label>
 
           <label>Servicios que atiende</label>
+          {/* Caso especial: si no cargaste servicios todavía, no podés
+              asignar ninguno. Le avisamos al admin con un mensaje
+              en vez de mostrar un grupo vacío. */}
           {serviceTypes.length === 0 ? (
             <p className="admin-empty">Primero cargá tipos de servicio.</p>
           ) : (
@@ -237,6 +273,8 @@ function Professionals() {
                     <td>{pro.speciality}</td>
                     <td>{pro.active ? "Activo" : "Inactivo"}</td>
                     <td>
+                      {/* Si no atiende ninguno mostramos un guion en
+                          vez de un string vacío (más prolijo visualmente). */}
                       {pro.services.length === 0
                         ? "—"
                         : pro.services.map((s) => s.name).join(", ")}
