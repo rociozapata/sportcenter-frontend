@@ -1,0 +1,263 @@
+
+.profile-container {
+    padding: 3rem 2rem;
+    color: #ffffff; /* Texto blanco por defecto */
+}
+
+.profile-section {
+    margin-bottom: 4rem; /* Espacio generoso entre bloques */
+}
+
+.profile-section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #6b8e00; /* Subrayado verde neón corto */
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+/* ==========================================================================
+   BLOQUE A: CABECERA (Flexbox para Nombre + Botón)
+   ========================================================================== */
+.profile-header-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary); /* Fondo oscuro secundario */
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.profile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-avatar-wrapper {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #6b8e00; /* Borde verde neón */
+}
+
+.profile-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-name {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin: 0 0 0.25rem 0;
+    color: var(--neutral);
+}
+
+.profile-membership {
+    font-size: 1rem;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.profile-config-btn {
+    background-color: transparent;
+    border: 2px solid #6b8e00;
+    color: #6b8e00;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-config-btn:hover {
+    background-color: #6b8e00;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(107, 142, 0, 0.5);
+}
+
+/* ==========================================================================
+   BLOQUE B: ESTADÍSTICAS (Grid de 4 columnas)
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background-color: var(--primary);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-card h4 {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+}
+
+.stat-card p {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Tarjeta especial para el Total (resaltada en verde) */
+.stat-card--total {
+    background-color: #6b8e00;
+    border: none;
+}
+
+.stat-card--total h4,
+.stat-card--total p {
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   BLOQUES C y D: TURNOS Y HISTORIAL (Flexbox para Filas)
+   ========================================================================== */
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.booking-row {
+    display: flex;
+    align-items: center;
+    background-color: var(--primary);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid transparent; /* Dejamos un borde invisible preparado */
+    /* Transicionamos la transformacion y el borde para que el efecto sea suave */
+    transition: transform 0.2s ease, border-left-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.booking-row--upcoming:hover {
+    transform: translateX(6px); /* Desplaza la fila 6 píxeles a la derecha de forma elegante */
+    border-left-color: #6b8e00; /* Le prende un vivo verde neón en el borde izquierdo */
+    box-shadow: 0 4px 12px rgba(107, 142, 0, 0.15); /* Una luz sutil verde abajo */
+}
+
+.booking-row--past:hover {
+    transform: translateX(4px); /* Se mueve un toque menos */
+    border-left-color: #94a3b8; /* Prende un vivo gris/neutral */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Etiqueta del deporte (Pádel, Tenis, etc.) */
+.booking-badge {
+    background-color: #6b8e00;
+    color: var(--neutral);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    width: 120px;
+    text-align: center;
+    margin-right: 2rem;
+}
+
+.booking-badge--past {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+}
+
+/* Contenedor del texto (Fecha y Cancha) */
+.booking-details {
+    flex-grow: 1; /* Ocupa todo el espacio sobrante en el medio */
+    display: flex;
+    flex-direction: column;
+}
+
+.booking-details strong {
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.booking-details span {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+/* Botón Cancelar (Turnos próximos) */
+.booking-cancel-btn {
+    background-color: transparent;
+    border: 1px solid rgba(255, 68, 68, 0.5); /* Rojo suave */
+    color: #ff4444;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.booking-cancel-btn:hover {
+    background-color: #ff4444;
+    color: #ffffff;
+}
+
+/* Etiquetas de Estado (Historial) - Aquí usamos los SPANs */
+.history-status {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Clases dinámicas para los SPAN de estado */
+.history-status--asistió {
+    background-color: rgba(107, 142, 0, 0.1);
+    color: #6b8e00; /* Verde neón */
+}
+
+.history-status--cancelado {
+    background-color: rgba(255, 68, 68, 0.1);
+    color: #ff4444; /* Rojo neón */
+}
+
+/* ==========================================================================
+   RESPONSIVO (Celu y Tablet)
+   ========================================================================== */
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablet */
+    }
+}
+
+@media (max-width: 650px) {
+    .profile-header-block {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .profile-user-info {
+        flex-direction: column;
+    }
+
+    .booking-row {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .booking-badge {
+        margin-right: 0;
+    }
+}
