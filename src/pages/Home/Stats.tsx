@@ -5,7 +5,7 @@ import "./Stats.css";
 const stats = [
     { value: "+500", label: "Socios activos" },
     { value: "+10", label: "Años de trayectoria" },
-    { value: "12", label: "Canchas y espacios" },
+    { value: "+12", label: "Canchas y espacios" },
     { value: "+20", label: "Clases por semana" },
 ];
 
