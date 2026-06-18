@@ -28,6 +28,14 @@ import {
 // Pedimos más por página acá porque la grilla tiene mucha info.
 const PAGE_SIZE = 15;
 
+// Formatea un Date al formato LocalDateTime del back (ISO local, sin zona).
+// No usamos toISOString() porque devuelve UTC y desfasaría el filtro.
+function toLocalIso(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 // ----- Helpers de presentación -----------------------------------------
 
 // Formatea un ISO datetime al formato de la locale del usuario.
@@ -55,19 +63,27 @@ function Appointments() {
   // tendríamos que elegir un default arbitrario, no nos sirve.
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "">("");
 
+  // Por defecto mostramos SOLO turnos futuros (from = ahora).
+  // Cuando el admin tilda "Ver historial", pasa a true y el filtro de
+  // fecha se desactiva, mostrándose también los turnos pasados.
+  const [showHistory, setShowHistory] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
 
   // ------ Carga ---------------------------------------------------------
 
-  async function load(targetPage: number, status: AppointmentStatus | "") {
+  async function load(targetPage: number, status: AppointmentStatus | "", history: boolean) {
     setLoading(true);
     setError(null);
     try {
       // Si status es "" no pasamos el filtro (el service lo trata como undefined).
+      // history=false → from=ahora (solo próximos).
+      // history=true  → sin from (incluye turnos pasados).
       const response = await getAppointments(targetPage, PAGE_SIZE, {
         status: status || undefined,
+        from: history ? undefined : toLocalIso(new Date()),
       });
       setData(response);
     } catch (err) {
@@ -77,11 +93,11 @@ function Appointments() {
     }
   }
 
-  // Re-cargar cuando cambia la página O el filtro de estado.
-  // React diff a las deps: si cualquiera cambia, vuelve a correr el effect.
+  // Re-cargar cuando cambia la página, el filtro de estado o el toggle
+  // de historial. React diff a las deps: si cualquiera cambia, corre el effect.
   useEffect(() => {
-    load(page, statusFilter);
-  }, [page, statusFilter]);
+    load(page, statusFilter, showHistory);
+  }, [page, statusFilter, showHistory]);
 
   // ------ Helpers de estado --------------------------------------------
 
@@ -137,7 +153,7 @@ function Appointments() {
       await deleteAppointment(appt.id);
       const remaining = (data?.content.length ?? 1) - 1;
       if (remaining === 0 && page > 0) setPage(page - 1);
-      else await load(page, statusFilter);
+      else await load(page, statusFilter, showHistory);
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo eliminar");
       setBusy(appt.id, false);
@@ -151,7 +167,7 @@ function Appointments() {
       <header className="admin-panel-header">
         <h1>Turnos</h1>
 
-        {/* Selector de filtro. Al cambiar reseteamos `page` a 0
+        {/* Filtros. Al cambiar cualquiera reseteamos `page` a 0
             porque la "página 5 de pendientes" no existe en "todos". */}
         <div className="admin-filters">
           <label htmlFor="appt-status">Estado:</label>
@@ -168,6 +184,21 @@ function Appointments() {
             <option value="CONFIRMED">Confirmados</option>
             <option value="CANCELLED">Cancelados</option>
           </select>
+
+          {/* Por defecto solo mostramos próximos. El admin tilda este
+              checkbox cuando quiere ver el historial completo. */}
+          <label className="admin-form-inline" htmlFor="appt-history">
+            <input
+              id="appt-history"
+              type="checkbox"
+              checked={showHistory}
+              onChange={(e) => {
+                setPage(0);
+                setShowHistory(e.target.checked);
+              }}
+            />
+            Ver historial
+          </label>
         </div>
       </header>
 

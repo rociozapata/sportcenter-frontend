@@ -314,6 +314,66 @@
     color: var(--primary);
 }
 
+/* ----- Top de servicios (ranking en el dashboard) -------------------- */
+
+.admin-top {
+    margin-top: 28px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.admin-top h2 {
+    margin: 0 0 12px 0;
+    font-size: 1.05rem;
+}
+
+.admin-top-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: top;
+}
+
+.admin-top-list li {
+    counter-increment: top;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.admin-top-list li:last-child {
+    border-bottom: none;
+}
+
+/* Número de posición a la izquierda del nombre, generado por CSS. */
+.admin-top-list li::before {
+    content: counter(top);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: var(--primary);
+    font-weight: 700;
+    margin-right: 12px;
+}
+
+.admin-top-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.admin-top-count {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
 /* ----- 8. Filtros y badges de estado (turnos) ------------------------ */
 
 /* Filtros en la cabecera (ej. selector de estado en /turnos). */
