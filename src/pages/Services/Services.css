@@ -1,11 +1,14 @@
 
+.services {
+    background-color: #ffffff; 
+    padding-bottom: 4rem; 
+}
+
 .services-zigzag{
     display: flex;
     flex-direction: column;
     gap: 4rem;
-    margin-top: 3rem;
-    background-color: var(--neutral);
-
+    margin-top: 3rem;   
 }
 .services-header {
     font-size: clamp(2rem, 4vw, 2.75rem);
@@ -22,19 +25,31 @@
     align-items: center; /* Centra el texto verticalmente respecto a la foto */
 }
 
+/* filas impares borde contenedor */
+.services-zigzag-row:nth-child(odd){
+    background-color: transparent;
+    border: 1px solid #798088;
+    border-radius: 16px;
+}
+
 /* El truco mágico: A las filas PARES (2, 4...) les damos vuelta el orden */
 .services-zigzag-row:nth-child(even) {
     direction: rtl; /* Hace que el grid empiece a dibujar desde la derecha */
+    background-color: var(--primary);
+    border-radius: 16px;
+    border: 1px solid transparent;  /*  Borde fantasma para emparejar el tamaño */
+    
 }
 
 /* Restauramos la dirección del texto adentro del contenido par para que no se lea al revés */
 .services-zigzag-row:nth-child(even) .services-zigzag-content {
     direction: ltr; /* Texto normal de izquierda a derecha */
+    
 }
 
 .services-zigzag-img {
     width: 100%;
-    height: 350px; /* Un buen alto para que luzca la disciplina */
+    height: 100%; /* Un buen alto para que luzca la disciplina */
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(10, 25, 41, 0.1);
@@ -58,6 +73,11 @@
     margin-bottom: 1rem;
 }
 
+/* primero apunto al contenedor y luego lo que puntualmente quiero cambiar */
+.services-zigzag-row:nth-child(even) .services-zigzag-title{
+    color: var(--neutral);
+}
+
 .services-zigzag-description {
     font-size: 1.05rem;
     line-height: 1.6;
@@ -69,25 +89,62 @@
 @media (max-width: 768px) {
     .services-zigzag-row {
         grid-template-columns: 1fr; /* Una sola columna */
-        gap: 1.5rem;
+        gap: 2rem;
+        padding: 1.5rem;
     }
 
-    /* En el celular anulamos el giro de las filas pares para que mantengan el orden Foto -> Texto */
-    .services-zigzag-row:nth-child(even) {
-        direction: ltr;
+    /* En el celular, la foto siempre arriba y el texto abajo.
+       Con esto le decimos que no importa el orden original, la foto va primero (order: 1) 
+       y el bloque de texto va segundo (order: 2). */
+    .services-zigzag-img {
+        order: 1; 
+        height: 240px; /* En el celu sí le fijamos un alto lindo a la caja */
+        width: 100%;
+    }
+
+    .services-zigzag-content{
+        order: 2;
     }
     
     .services-zigzag-img{
-        height: 240px; /* Achicamos un toque la foto en el celu */
+        height: 100%; 
+        object-fit: cover;
     }
 }
 
+/* BARRA DIVISORIA */
 
-/* --- SECCIÓN STAFF --- */
+.brand-divider-bar {
+    width: 100%;
+    height: 40px; 
+    background-color: var(--primary); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2); /* Sombreado interno para darle profundidad */
+}
+
+.brand-divider-text {
+    color: var(--secondary);
+    font-size: 0.85rem;
+    font-weight: 800;
+    
+}
+
+/*  SECCIÓN STAFF */
 .staff-section {
-    margin-top: 6rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100%;
+    background-color: #ffffff;
     padding-top: 4rem;
+    padding-bottom: 5rem;
+}
+
+.staff-container {
+    max-width: 1200px; /* El mismo ancho máximo que seguro usan tus servicios */
+    margin: 0 auto;    
+    padding: 0 2rem;   
 }
 
 .staff-intro {
@@ -113,7 +170,7 @@
     height: 380px; /* Le damos un poco más de alto total */
     border-radius: 12px;
     overflow: hidden;
-    background-color: #1e2a3a; /* Fondo oscuro del complejo para el texto */
+    background-color: var(--primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -150,14 +207,14 @@
 .staff-card-name {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #ffffff; /* Letras blancas sobre el fondo oscuro */
+    color: var(--neutral); 
     margin: 0 0 0.15rem 0;
 }
 
 .staff-card-role {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #6b8e00; /* Tu verde deportivo para destacar la disciplina */
+    color: var(--secondary); 
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.05em;

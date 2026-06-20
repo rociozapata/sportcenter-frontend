@@ -6,8 +6,8 @@ import crossfitImg from "/src/assets/service-crossfit.jpg";
 import funcionalImg from "/src/assets/service-funcional.jpg"
 
 import staffTenisImg from "/src/assets/staff-tenis.webp";
-import staffPadelImg from "/src/assets/staff-padel.webp";
-import staffFutbolImg from "/src/assets/staff-futbol.webp";
+import staffPadelImg from "/src/assets/staff-pade.jpg";
+import staffFutbolImg from "/src/assets/staff-futbol.jpg";
 import staffFuncionalImg from "/src/assets/staff-funcional.webp";
 import staffCrossfitImg from "/src/assets/staff-crossfit.webp";
 
@@ -88,56 +88,64 @@ const staff = [
 
 function Services() {
     return (
-        <section className="services">
+        <>
+            {/* seccio servicios */}
+            <section className="services">
+                <h2 className="services-header">Nuestras Clases</h2>
+                <div className="services-zigzag">
+                    {service.map((s) => (
+                        <article key={s.key} className="services-zigzag-row">
 
-            <h2 className="services-header">Nuestras Clases</h2>
-
-            <div className="services-zigzag">
-                {service.map((s) => (
-                    <article key={s.key} className="services-zigzag-row">
-
-                        <div className="services-zigzag-img">
-                            <img src={s.img} alt={s.title} />
-                        </div>
-
-                        <div className="services-zigzag-content">
-                            <h3 className="services-zigzag-title">{s.title}</h3>
-                            <p className="services-zigzag-description">{s.description}</p>
-                            <button className="btn btn-accent">Ver horarios</button>
-                        </div>
-                    </article>
-
-                ))}
-            </div>
-
-            <div className="staff-section">
-                <div className="staff-header">
-                    <h2 className="services-header">Nuestro Staff</h2>
-                    <p className="staff-intro">
-                        Detrás de cada gran deportista hay un gran equipo. En SportCenter contamos con
-                        profesionales apasionados, certificados internacionalmente y comprometidos con tus objetivos.
-                        Ya sea que estés dando tus primeros pasos o buscando tu máximo rendimiento competitivo,
-                        nuestros entrenadores están listos para guiarte, motivarte y exigirte en cada sesión.
-                    </p>
-                </div>
-
-                <div className="staff-grid">
-                    {staff.map((p) => (
-                        <article key={p.key} className={`staff-card staff-card--${p.key}`}>
-
-                            <div className="staff-card-img">
-                                <img src={p.img} alt={p.name} />
+                            <div className="services-zigzag-img">
+                                <img src={s.img} alt={s.title} />
                             </div>
 
-                            <div className="staff-card-info">
-                                <h3 className="staff-card-name">{p.name}</h3>
-                                <p className="staff-card-role">{p.role}</p>
+                            <div className="services-zigzag-content">
+                                <h3 className="services-zigzag-title">{s.title}</h3>
+                                <p className="services-zigzag-description">{s.description}</p>
+                                <button className="btn btn-accent">Ver horarios</button>
                             </div>
                         </article>
                     ))}
                 </div>
+            </section>
+
+            {/* barra divisoria de secciones */}
+            <div className="brand-divider-bar">
+                <span className="brand-divider-text">SportCenter</span>
             </div>
-        </section>
+
+            {/* seccion staff */}
+            <section className="staff-section">
+                <div className="staff-container">
+                    <div className="staff-header">
+                        <h2 className="services-header">Nuestro Staff</h2>
+                        <p className="staff-intro">
+                            Detrás de cada gran deportista hay un gran equipo. En SportCenter contamos con
+                            profesionales apasionados, certificados internacionalmente y comprometidos con tus objetivos.
+                            Ya sea que estés dando tus primeros pasos o buscando tu máximo rendimiento competitivo,
+                            nuestros entrenadores están listos para guiarte, motivarte y exigirte en cada sesión.
+                        </p>
+                    </div>
+
+                    <div className="staff-grid">
+                        {staff.map((p) => (
+                            <article key={p.key} className={`staff-card staff-card--${p.key}`}>
+
+                                <div className="staff-card-img">
+                                    <img src={p.img} alt={p.name} />
+                                </div>
+
+                                <div className="staff-card-info">
+                                    <h3 className="staff-card-name">{p.name}</h3>
+                                    <p className="staff-card-role">{p.role}</p>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        </>
 
     );
 }
