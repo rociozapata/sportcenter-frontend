@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import "./Footer.css";
 import { BsTelephoneFill, BsClockFill } from "react-icons/bs";
 import { IoIosMail } from "react-icons/io";
-import { FaFacebook, FaInstagram } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 
 function Footer() {
@@ -61,27 +60,6 @@ function Footer() {
                         la tecnología e instalaciones de élite.
                     </p>
 
-                    {/* Iconos circulares de redes sociales. */}
-                    <div className="footer-socials">
-                        <a
-                            href="https://www.instagram.com/sportcenter"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label="Instagram de SportCenter"
-                            className="footer-social"
-                        >
-                            <FaInstagram />
-                        </a>
-                        <a
-                            href="https://www.facebook.com/sportcenter"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label="Facebook de SportCenter"
-                            className="footer-social"
-                        >
-                            <FaFacebook />
-                        </a>
-                    </div>
                 </section>
 
                 {/* Columna 3: enlaces útiles internos del sitio. */}

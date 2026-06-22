@@ -85,34 +85,6 @@
     opacity: 0.85;
 }
 
-/* Contenedor de los íconos de redes sociales (Instagram, Facebook). */
-.footer-socials {
-    display: flex;
-    gap: 14px;
-    margin-top: 8px;
-}
-
-/* Cada ícono de red social va en un círculo. */
-.footer-social {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;             /* círculo perfecto */
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--neutral);
-    text-decoration: none;
-    font-size: 1.2rem;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.footer-social:hover {
-    background-color: var(--secondary);
-    color: var(--primary);
-    transform: translateY(-2px);    /* se levanta un poco al pasar el mouse */
-}
-
 /* Línea divisora + barra inferior con el copyright. */
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.15);
