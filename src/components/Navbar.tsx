@@ -118,7 +118,7 @@ function Navbar() {
         <div className="navbar-links">
           <Link to="/" onClick={closeMenu}>Inicio</Link>
           <Link to="/servicios" onClick={closeMenu}>Servicios</Link>
-          <Link to="/turnos" onClick={closeMenu}>Mis turnos</Link>
+          <Link to="/perfil" onClick={closeMenu}>Mis turnos</Link>
         </div>
 
         {/* Bloque derecho del navbar: ícono de perfil + botón "Reservar". */}
@@ -167,9 +167,17 @@ function Navbar() {
                     <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
                       Mi perfil
                     </Link>
-                    <Link to="/turnos" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
+                    <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
                       Mis turnos
                     </Link>
+                    {/* Acceso al panel de admin: solo aparece si el usuario
+                        tiene rol ADMIN. user puede ser null mientras se
+                        resuelve /auth/me; por eso el optional chaining. */}
+                    {user?.role === "ADMIN" && (
+                      <Link to="/admin" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
+                        Panel de admin
+                      </Link>
+                    )}
                     {/* Botón (no link) porque no navegamos: ejecutamos lógica. */}
                     <button type="button" role="menuitem" onClick={handleLogout}>
                       Cerrar sesión

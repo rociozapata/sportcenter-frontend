@@ -105,6 +105,46 @@ export async function getCurrentUser(): Promise<CurrentUser> {
   return response.json();
 }
 
+// Payload de actualización de perfil. password/currentPassword son
+// opcionales: solo se mandan cuando el usuario quiere cambiar su clave.
+export interface UpdateProfilePayload {
+  username: string;
+  email: string;
+  password?: string;
+  currentPassword?: string;
+}
+
+// PUT /users/{id} — actualiza el propio usuario. Requiere sesión.
+// El back rechaza con 4xx si username/email ya existen, o si la
+// currentPassword no coincide al intentar cambiar la clave.
+export async function updateMyProfile(id: number, payload: UpdateProfilePayload): Promise<CurrentUser> {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (!token) throw new Error("No hay sesión activa");
+
+  // Limpiamos campos vacíos para no mandar "" al back: si el usuario
+  // no escribió una nueva clave, omitimos password y currentPassword.
+  const body: UpdateProfilePayload = {
+    username: payload.username,
+    email: payload.email,
+  };
+  if (payload.password && payload.password.length > 0) {
+    body.password = payload.password;
+    if (payload.currentPassword) body.currentPassword = payload.currentPassword;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) await throwApiError(response);
+  return response.json();
+}
+
 // Helper: devuelve el token guardado (o null si no hay).
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_STORAGE_KEY);

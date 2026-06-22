@@ -1,0 +1,244 @@
+/* ============================================================
+   Booking (/turnos) — estilos del flujo de reserva.
+   ============================================================ */
+
+.booking-section {
+    max-width: 760px;
+    margin: 48px auto;
+    padding: 0 20px;
+    color: #1a202c;
+}
+
+.booking-section > h1 {
+    color: var(--primary);
+    margin-bottom: 4px;
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+}
+
+.booking-subtitle {
+    color: #4a5568;
+    margin: 0 0 28px;
+    font-size: 0.98rem;
+}
+
+/* Tarjeta contenedora del formulario. */
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px 28px 32px;
+    box-shadow: 0 4px 18px rgba(26, 54, 93, 0.06);
+}
+
+/* Cada label arranca con un badge numerado. */
+.booking-form label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: 18px;
+    font-size: 1rem;
+}
+
+.booking-form label:first-of-type {
+    margin-top: 0;
+}
+
+.step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.booking-form select,
+.booking-form input[type="date"],
+.booking-form textarea {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    font: inherit;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.booking-form select:focus,
+.booking-form input[type="date"]:focus,
+.booking-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.12);
+}
+
+.booking-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.booking-empty {
+    color: #4a5568;
+    font-style: italic;
+    background: #f7fafc;
+    border: 1px dashed #cbd5e0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 6px 0 0;
+}
+
+/* ----- Grilla de slots ----------------------------------------------- */
+
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Slot base. */
+.slot {
+    padding: 11px 6px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s;
+}
+
+.slot-free {
+    background: #ebfaf0;
+    color: #22543d;
+    border-color: #9ae6b4;
+}
+
+.slot-free:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(34, 84, 61, 0.15);
+    background: #d9f5e3;
+}
+
+.slot-busy {
+    background: #fff1f1;
+    color: #9b2c2c;
+    border-color: #feb2b2;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.85;
+}
+
+.slot-past {
+    background: #edf2f7;
+    color: #a0aec0;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+/* Slot elegido: relleno primario. */
+.slot-selected,
+.slot-selected:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 4px 12px rgba(26, 54, 93, 0.28);
+    transform: translateY(-1px);
+}
+
+/* Leyenda debajo de la grilla. */
+.slot-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 4px;
+    margin-top: 16px;
+    color: #4a5568;
+    font-size: 0.85rem;
+}
+
+.legend-chip {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: default;
+    margin-left: 14px;
+}
+
+.legend-chip:first-of-type {
+    margin-left: 4px;
+}
+
+/* ----- Resumen previo a confirmar ------------------------------------ */
+
+.booking-summary {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf4fb 100%);
+    border: 1px solid #cdd9e8;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    color: #2d3748;
+    display: grid;
+    gap: 4px;
+}
+
+.booking-summary strong {
+    color: var(--primary);
+}
+
+/* ----- Submit y feedback --------------------------------------------- */
+
+.booking-submit {
+    margin-top: 18px;
+    align-self: flex-start;
+    padding: 12px 26px;
+    font-size: 1rem;
+}
+
+.booking-error {
+    color: #9b2c2c;
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 14px;
+}
+
+.booking-success {
+    color: #22543d;
+    background: #ebfaf0;
+    border: 1px solid #9ae6b4;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 14px;
+}
+
+/* ----- Responsive ----------------------------------------------------- */
+
+@media (max-width: 540px) {
+    .booking-form {
+        padding: 20px 18px 24px;
+    }
+
+    .slot-grid {
+        grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+        gap: 8px;
+    }
+
+    .booking-section > h1 {
+        font-size: 1.6rem;
+    }
+}
