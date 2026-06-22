@@ -60,6 +60,24 @@ function Navbar() {
     return () => { cancelled = true; };
   }, [authed, location.pathname]);
 
+  // EFECTO 1.5: mientras el drawer mobile está abierto, cerrarlo con Escape
+  // y bloquear el scroll del body para que la página de atrás no se mueva.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    // Guardamos el valor previo y lo restauramos en el cleanup para no
+    // pisar un overflow que otra parte de la app pudiera haber seteado.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
+
   // EFECTO 2: cerrar el dropdown del perfil al clickear afuera.
   // Solo escuchamos el evento mientras el menú está abierto, para no
   // gastar listeners de más cuando está cerrado.
@@ -110,6 +128,16 @@ function Navbar() {
         <span></span>
       </button>
 
+      {/* Backdrop oscuro detrás del drawer (solo mobile). Clickearlo cierra
+          el menú. Solo existe en el DOM mientras el drawer está abierto. */}
+      {isOpen && (
+        <div
+          className="navbar-backdrop"
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Menú principal. En desktop está siempre visible; en mobile se muestra
           solo cuando isOpen es true (se le agrega la clase "is-open"). */}
       <div className={`navbar-menu ${isOpen ? "is-open" : ""}`}>
@@ -119,6 +147,11 @@ function Navbar() {
           <Link to="/" onClick={closeMenu}>Inicio</Link>
           <Link to="/servicios" onClick={closeMenu}>Servicios</Link>
           <Link to="/perfil" onClick={closeMenu}>Mis turnos</Link>
+          {/* Acceso directo al panel de admin: solo para usuarios con rol
+              ADMIN. Antes vivía únicamente en el dropdown del perfil. */}
+          {user?.role === "ADMIN" && (
+            <Link to="/admin" onClick={closeMenu}>Panel de admin</Link>
+          )}
         </div>
 
         {/* Bloque derecho del navbar: ícono de perfil + botón "Reservar". */}
@@ -142,6 +175,11 @@ function Navbar() {
               {/* Indicador verde: solo aparece si hay sesión activa.
                   aria-hidden porque la info ya la da el aria-label del botón. */}
               {authed && <span className="navbar-profile-dot" aria-hidden="true" />}
+              {/* Etiqueta de texto solo visible en mobile (CSS la oculta en
+                  desktop). Aclara qué es el avatar dentro del drawer. */}
+              <span className="navbar-profile-label">
+                {authed ? (user?.username ?? "Mi cuenta") : "Ingresar"}
+              </span>
             </button>
 
             {/* Renderizado condicional: el dropdown solo existe en el DOM
@@ -167,17 +205,6 @@ function Navbar() {
                     <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
                       Mi perfil
                     </Link>
-                    <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
-                      Mis turnos
-                    </Link>
-                    {/* Acceso al panel de admin: solo aparece si el usuario
-                        tiene rol ADMIN. user puede ser null mientras se
-                        resuelve /auth/me; por eso el optional chaining. */}
-                    {user?.role === "ADMIN" && (
-                      <Link to="/admin" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
-                        Panel de admin
-                      </Link>
-                    )}
                     {/* Botón (no link) porque no navegamos: ejecutamos lógica. */}
                     <button type="button" role="menuitem" onClick={handleLogout}>
                       Cerrar sesión

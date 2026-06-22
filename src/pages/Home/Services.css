@@ -1,15 +1,24 @@
-.services {
-    position: relative;          /* ancla para el .services-wave absoluto */
+.facilities {
+    position: relative;          /* ancla para el .facilities-wave absoluto */
     padding: 5rem 8%;
     /* Antes era #f5f7fa; ahora compartimos --neutral con Benefits para
        que la transición entre ambas secciones desaparezca. */
     background-color: var(--neutral);
 }
 
+/* Contenedor interno que limita el ancho en pantallas grandes para que
+   las cards no se estiren a lo largo de todo el viewport. */
+.facilities-header,
+.facilities-grid {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* Wave decorativa pegada al borde superior de Services.
    Como tiene el color oscuro del Hero, visualmente "estira" el hero
    hacia abajo y suaviza el corte recto. */
-.services-wave {
+.facilities-wave {
     position: absolute;
     top: 0;
     left: 0;
@@ -22,16 +31,13 @@
 
 /* El header de la sección queda por debajo de la wave: le damos margen
    superior para que el texto no se solape con la curva. */
-.services-header {
+.facilities-header {
     position: relative;
     margin-top: 1.5rem;
-}
-
-.services-header {
     margin-bottom: 3rem;
 }
 
-.services-kicker {
+.facilities-kicker {
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.15em;
@@ -40,7 +46,7 @@
     text-transform: uppercase;
 }
 
-.services-title {
+.facilities-title {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 800;
     color: var(--primary);
@@ -48,9 +54,9 @@
     letter-spacing: -0.02em;
 }
 
-.services-grid {
+.facilities-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     grid-auto-rows: 260px;
     gap: 1.5rem;
 }
@@ -104,11 +110,11 @@
 }
 
 .facility-card--wide {
-    grid-column: span 2;
+    grid-column: span 3;
 }
 
 .facility-card--narrow {
-    grid-column: span 1;
+    grid-column: span 2;
 }
 
 .facility-card-content {
@@ -153,18 +159,35 @@
 }
 
 @media (max-width: 900px) {
-    .services {
-        padding: 4rem 5%;
+    .facilities {
+        padding: 3rem 5%;
     }
 
-    .services-grid {
+    .facilities-header {
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .facilities-title {
+        font-size: clamp(1.6rem, 7vw, 2rem);
+    }
+
+    .facilities-grid {
         grid-template-columns: 1fr;
-        grid-auto-rows: 220px;
+        grid-auto-rows: 200px;
         gap: 1rem;
     }
 
     .facility-card--wide,
     .facility-card--narrow {
         grid-column: span 1;
+    }
+
+    .facility-card-content {
+        padding: 1.25rem;
+    }
+
+    .facility-card-description {
+        max-width: 100%;
     }
 }

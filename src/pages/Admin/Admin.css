@@ -438,8 +438,52 @@
     }
     .admin-content {
         padding: 16px;
+        /* Clave: sin esto, el ítem de grid (min-width:auto) se estira al
+           ancho del contenido más ancho — la tabla — y desborda todo el
+           layout. Con min-width:0 puede encogerse y deja que la tabla
+           scrollee dentro de su propio contenedor. */
+        min-width: 0;
     }
+
+    .admin-panel {
+        min-width: 0;
+    }
+
+    /* La cabecera (título + metadata) se apila para no desbordar. */
+    .admin-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    /* Tablas: como tienen muchas columnas, en mobile las volvemos un
+       bloque con scroll horizontal propio en vez de que estiren la
+       página entera. white-space:nowrap evita que las celdas se
+       partan en varias líneas y se desarmen. */
     .admin-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
         font-size: 0.85rem;
+    }
+
+    /* Inputs/selects y formularios al ancho completo sin desbordar
+       por el padding (border-box incluye el padding en el width). */
+    .admin-form input,
+    .admin-form select,
+    .admin-table select,
+    .admin-filters select {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    /* Paginación y acciones de form centradas y a ancho completo. */
+    .admin-pagination,
+    .admin-form-actions {
+        justify-content: stretch;
+    }
+    .admin-pagination .btn {
+        flex: 1;
     }
 }
