@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 
 // Link: para navegar sin recargar la página.
 // useNavigate: hook que permite redirigir por código (ej. después del login).
-import { Link, useNavigate } from "react-router-dom";
+// useSearchParams: para leer la query string (ej. ?expired=1).
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 // Importamos nuestra función login del servicio.
 import { login } from "../../services/auth";
@@ -28,6 +29,11 @@ function Login() {
 
   // Hook que nos da una función para redirigir a otra ruta.
   const navigate = useNavigate();
+
+  // Si llegamos acá por un 401 (token vencido), la URL trae ?expired=1.
+  // Mostramos un cartel informativo arriba del form.
+  const [searchParams] = useSearchParams();
+  const expired = searchParams.get("expired") === "1";
 
   // Función que se ejecuta cuando el usuario aprieta "Ingresar".
   async function handleSubmit(e: FormEvent) {
@@ -60,6 +66,12 @@ function Login() {
       {/* onSubmit dispara handleSubmit cuando el usuario aprieta Enter o el botón. */}
       <form className="auth-form" onSubmit={handleSubmit}>
         <h1>Iniciar sesión</h1>
+
+        {expired && (
+          <p className="auth-notice">
+            Tu sesión expiró. Volvé a iniciar sesión para continuar.
+          </p>
+        )}
 
         <label htmlFor="login-email">Email</label>
         <input

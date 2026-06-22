@@ -63,6 +63,16 @@
 }
 
 /* Caja de error: rojo suave, mismo patrón que muchos forms. */
+.auth-notice {
+  color: #744210;
+  background: #fefcbf;
+  border: 1px solid #f6e05e;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 .auth-error {
   color: #b91c1c;
   background: #fee2e2;

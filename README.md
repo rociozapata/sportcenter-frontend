@@ -34,8 +34,6 @@ Este repo contiene **solo el frontend**: consume la API REST de [sportcenter-api
 - **react-icons**: catálogo de íconos en componentes.
 - **fetch** nativo del browser: no usamos axios; menos dependencias.
 
-> **¿Por qué no Redux / Zustand?** Los datos se piden cuando se necesitan y el estado vive en el componente más cercano a donde se usa. Para una app de este tamaño, sumar una librería de estado global sería sobreingeniería.
-
 ---
 
 ## Cómo correrlo
@@ -141,12 +139,17 @@ Helpers en [auth.ts](src/services/auth.ts):
 | `getCurrentUser()` | GET `/auth/me` con el Bearer; devuelve `{ id, username, email, role, createdDate }`. |
 | `updateMyProfile(id, payload)` | PUT `/users/{id}` con los campos editados. |
 | `getToken()` | Lee el token (o `null`). |
-| `isAuthenticated()` | `true` si hay token. **Solo verifica presencia**, no validez ni vencimiento. |
+| `isAuthenticated()` | `true` si hay token **y** el `exp` del JWT todavía no pasó. Decodifica el payload base64 y compara con `Date.now()`. |
 | `logout()` | Borra el token del `localStorage`. |
 
 > **Importante:** ninguna pantalla lee `localStorage` a mano. Si algo nuevo necesita saber si hay sesión, importa `isAuthenticated()` de `auth.ts`.
 
-**Limitación conocida:** `isAuthenticated()` no comprueba si el JWT venció. Si el token caducó, la próxima request al back devolverá `401` y eso se mostrará como error en la UI; la sesión NO se cierra automáticamente.
+### Manejo de la expiración
+
+- En el front, `isAuthenticated()` decodifica el payload del JWT y mira el campo `exp` (unix timestamp). Si pasó, devuelve `false`, así el Navbar y los guards ya no tratan al usuario como logueado.
+- En los helpers `authFetch` (admin.ts), `bookingFetch` (booking.ts) y en las funciones de `auth.ts`, cada respuesta `401` dispara `handleUnauthorized()`: borra el token y redirige a `/login?expired=1`.
+- La pantalla de Login lee la query `?expired=1` y muestra un cartel amarillo: *"Tu sesión expiró. Volvé a iniciar sesión para continuar."*
+- El front NO verifica la firma del JWT (no tiene la clave). Eso lo hace el back: el chequeo de `exp` en el cliente es solo para UX; la seguridad real la pone el server.
 
 ---
 
@@ -596,14 +599,8 @@ Las páginas importan funciones tipadas: `await login(...)`, `await createAppoin
 
 ## Preguntas frecuentes
 
-**¿Por qué no usás Redux?**
-Para esta app, la mayoría del estado es local a cada pantalla y el resto vive en `localStorage` (token). Sumar Redux/Zustand sería sobreingeniería. Si el estado compartido entre páginas creciera, se podría introducir Context o Zustand.
-
 **¿Cómo se sabe en el front que un usuario es ADMIN?**
 `getCurrentUser()` devuelve `{ ..., role: "USER" | "ADMIN" }`. El `Navbar.tsx` muestra el link "Panel de admin" solo si `user?.role === "ADMIN"`, y `ProtectedAdminRoute.tsx` lo verifica de nuevo antes de montar. Igual el back valida con `@PreAuthorize`: nunca se confía en el cliente.
-
-**¿Qué pasa si el JWT vence?**
-`isAuthenticated()` solo verifica que haya un string guardado, no si es válido. Si está vencido, la próxima request fallará con 401 y se mostrará el error. Para una mejora real habría que decodificar el `exp` o interceptar 401s globalmente.
 
 **¿Por qué calcular los slots en el front y no en el back?**
 El back ya sabe los horarios ocupados (los devuelve en `availability`); calcular los libres es derivación pura. Hacerlo en el front evita lógica duplicada de duración/intervalos en el server y baja la carga. Igualmente el back valida `@Future` y la no-superposición al crear el turno.

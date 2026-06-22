@@ -14,7 +14,7 @@
 // Importamos la URL base y el nombre de la "caja" del localStorage
 // donde guardamos el token JWT. Los definí en api.ts para que sean
 // fáciles de cambiar y no queden strings sueltos en cada archivo.
-import { API_BASE_URL, TOKEN_STORAGE_KEY } from "./api";
+import { API_BASE_URL, TOKEN_STORAGE_KEY, handleUnauthorized } from "./api";
 
 // ----- Tipos compartidos -------------------------------------------------
 
@@ -76,6 +76,14 @@ async function authFetch(path: string, init: RequestInit = {}): Promise<Response
 
   // Hacemos el pedido real. Spread de init para preservar method/body.
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+
+  // Si el back nos rechaza por token vencido/inválido, deslogueamos
+  // globalmente y redirigimos. Lanzamos un error igual para cortar la
+  // cadena de promesas del caller (que no intente parsear la respuesta).
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Sesión expirada");
+  }
 
   // response.ok es true para status 2xx. Si no, armamos un Error.
   if (!response.ok) {

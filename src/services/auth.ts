@@ -1,5 +1,5 @@
-// Importamos la URL base y la clave del localStorage desde api.ts.
-import { API_BASE_URL, TOKEN_STORAGE_KEY } from "./api";
+// Importamos la URL base, la clave del localStorage y el helper de 401.
+import { API_BASE_URL, TOKEN_STORAGE_KEY, handleUnauthorized } from "./api";
 
 // Tipo: forma del objeto que mandamos al hacer login.
 export interface LoginPayload {
@@ -98,6 +98,13 @@ export async function getCurrentUser(): Promise<CurrentUser> {
     headers: { Authorization: `Bearer ${token}` },  // formato estándar: "Bearer <token>"
   });
 
+  // Si el back nos rechaza por token vencido/inválido, deslogueamos y
+  // redirigimos a /login con la flag ?expired=1.
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Sesión expirada");
+  }
+
   // Mismo manejo de error que las otras funciones.
   if (!response.ok) await throwApiError(response);
 
@@ -141,6 +148,10 @@ export async function updateMyProfile(id: number, payload: UpdateProfilePayload)
     body: JSON.stringify(body),
   });
 
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Sesión expirada");
+  }
   if (!response.ok) await throwApiError(response);
   return response.json();
 }
@@ -155,7 +166,21 @@ export function logout(): void {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
-// Helper: true si hay token guardado. Útil para mostrar/ocultar links del navbar.
+// Helper: true si hay token guardado Y todavía no venció.
+// Decodifica el payload del JWT (segunda parte, base64) y mira el campo
+// `exp` (unix timestamp en segundos). No verifica la firma: eso lo hace
+// el back; acá solo nos interesa evitar mostrar UI como "logueado" con
+// un token caducado. Si el parseo falla, asumimos inválido y deslogueamos.
 export function isAuthenticated(): boolean {
-  return Boolean(getToken());
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (typeof payload.exp !== "number") return true; // sin exp, lo tomamos válido
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    // Token con formato raro: lo limpiamos para no quedar en un estado inconsistente.
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    return false;
+  }
 }

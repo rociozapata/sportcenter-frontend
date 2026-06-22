@@ -6,7 +6,7 @@
 // endpoints son públicos o de USER común; no requieren rol ADMIN.
 // ============================================================
 
-import { API_BASE_URL, TOKEN_STORAGE_KEY } from "./api";
+import { API_BASE_URL, TOKEN_STORAGE_KEY, handleUnauthorized } from "./api";
 import type { Professional, ServiceType } from "./admin";
 
 // Helper similar al de admin.ts pero que NO exige token:
@@ -25,6 +25,14 @@ async function bookingFetch(path: string, init: RequestInit = {}): Promise<Respo
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+
+  // Si el usuario tenía token y el back lo rechazó, asumimos que venció:
+  // deslogueamos y redirigimos a /login?expired=1. Si no había token,
+  // dejamos que el caller maneje el error como cualquier otro.
+  if (response.status === 401 && token) {
+    handleUnauthorized();
+    throw new Error("Sesión expirada");
+  }
 
   if (!response.ok) {
     let message = `Error ${response.status}`;
