@@ -165,9 +165,20 @@ function Navbar() {
             <button
               type="button"
               className="navbar-profile-trigger"
-              onClick={() => setIsProfileOpen((v) => !v)}
+              onClick={() => {
+                // Con sesión: abre/cierra el dropdown.
+                // Sin sesión: no tiene sentido un menú vacío, así que
+                // mandamos directo al login, recordando la ruta actual
+                // para volver acá después de iniciar sesión.
+                if (authed) {
+                  setIsProfileOpen((v) => !v);
+                } else {
+                  closeMenu();
+                  navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                }
+              }}
               aria-label={authed ? "Abrir menú de perfil" : "Iniciar sesión"}
-              aria-expanded={isProfileOpen}
+              aria-expanded={authed ? isProfileOpen : undefined}
             >
               {/* alt="" porque al lado tenemos aria-label en el botón:
                   evitamos que el lector de pantalla lea dos veces lo mismo. */}
@@ -182,45 +193,31 @@ function Navbar() {
               </span>
             </button>
 
-            {/* Renderizado condicional: el dropdown solo existe en el DOM
-                cuando está abierto. Más liviano que mostrarlo/ocultarlo con CSS. */}
-            {isProfileOpen && (
+            {/* El dropdown solo existe con sesión iniciada y abierto. Sin
+                sesión, el botón de arriba navega al login en vez de abrir
+                este menú. */}
+            {authed && isProfileOpen && (
               <div className="navbar-profile-menu" role="menu">
-                {authed ? (
-                  // ----- CASO 1: usuario logueado -----
-                  <>
-                    {/* Cabecera del menú con nombre y email del usuario. */}
-                    <div className="navbar-profile-header">
-                      <span className="navbar-profile-name">
-                        {/* Si user todavía no llegó (fetch en curso o falló),
-                            mostramos "Mi cuenta" como fallback. */}
-                        {user?.username ?? "Mi cuenta"}
-                      </span>
-                      {/* El email solo se renderiza si lo tenemos. */}
-                      {user?.email && (
-                        <span className="navbar-profile-email">{user.email}</span>
-                      )}
-                    </div>
-                    {/* Cada link cierra ambos menús al ser clickeado. */}
-                    <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
-                      Mi perfil
-                    </Link>
-                    {/* Botón (no link) porque no navegamos: ejecutamos lógica. */}
-                    <button type="button" role="menuitem" onClick={handleLogout}>
-                      Cerrar sesión
-                    </button>
-                  </>
-                ) : (
-                  // ----- CASO 2: usuario no logueado -----
-                  <>
-                    <Link to="/login" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
-                      Iniciar sesión
-                    </Link>
-                    <Link to="/register" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
-                      Crear cuenta
-                    </Link>
-                  </>
-                )}
+                {/* Cabecera del menú con nombre y email del usuario. */}
+                <div className="navbar-profile-header">
+                  <span className="navbar-profile-name">
+                    {/* Si user todavía no llegó (fetch en curso o falló),
+                        mostramos "Mi cuenta" como fallback. */}
+                    {user?.username ?? "Mi cuenta"}
+                  </span>
+                  {/* El email solo se renderiza si lo tenemos. */}
+                  {user?.email && (
+                    <span className="navbar-profile-email">{user.email}</span>
+                  )}
+                </div>
+                {/* Cada link cierra ambos menús al ser clickeado. */}
+                <Link to="/perfil" role="menuitem" onClick={() => { closeProfile(); closeMenu(); }}>
+                  Mi perfil
+                </Link>
+                {/* Botón (no link) porque no navegamos: ejecutamos lógica. */}
+                <button type="button" role="menuitem" onClick={handleLogout}>
+                  Cerrar sesión
+                </button>
               </div>
             )}
           </div>

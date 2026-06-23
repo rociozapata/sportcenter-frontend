@@ -74,6 +74,22 @@
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+/* Select con flecha propia (chevron) en vez de la nativa, para que se
+   vea igual en todos los browsers. appearance:none saca la flecha del
+   sistema; el chevron va como background SVG a la derecha.
+   box-sizing:border-box evita que el padding lo desborde en mobile. */
+.booking-form select {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+}
+
 .booking-form select:focus,
 .booking-form input[type="date"]:focus,
 .booking-form textarea:focus {
@@ -85,6 +101,25 @@
 .booking-form textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+/* Línea informativa debajo de un campo (ej. duración + precio del
+   servicio elegido). Va en chips para que se lea de un vistazo. */
+.field-hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 0;
+}
+
+.field-hint span {
+    background: #edf4fb;
+    border: 1px solid #cdd9e8;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
 }
 
 .booking-empty {
@@ -142,6 +177,22 @@
 .slot-past {
     background: #edf2f7;
     color: #a0aec0;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+/* Celda libre pero donde no entra un turno de la duración elegida
+   (pisaría un turno posterior o el cierre). Gris con rayado sutil para
+   diferenciarla del "ocupado" (rojo) y del "ya pasó". */
+.slot-unavailable {
+    background: repeating-linear-gradient(
+        135deg,
+        #f1f5f9,
+        #f1f5f9 6px,
+        #e6ebf1 6px,
+        #e6ebf1 12px
+    );
+    color: #94a3b8;
     border-color: #e2e8f0;
     cursor: not-allowed;
 }
@@ -231,6 +282,20 @@
 @media (max-width: 540px) {
     .booking-form {
         padding: 20px 18px 24px;
+    }
+
+    /* Controles más altos y con font-size 16px: mejor área de toque y,
+       sobre todo, evita el zoom automático de iOS al enfocar el campo
+       (se dispara cuando la fuente es < 16px). */
+    .booking-form select,
+    .booking-form input[type="date"],
+    .booking-form textarea {
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .booking-form textarea {
+        min-height: 96px;
     }
 
     .slot-grid {

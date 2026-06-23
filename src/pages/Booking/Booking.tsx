@@ -20,7 +20,6 @@
 // ============================================================
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
 
 import { isAuthenticated } from "../../services/auth";
 import {
@@ -78,7 +77,7 @@ function overlaps(startA: Date, endA: Date, startB: Date, endB: Date): boolean {
 interface Slot {
   start: Date;
   end: Date;          // start + durationMinutes (lo que duraría EL TURNO)
-  state: "free" | "busy" | "past";
+  state: "free" | "busy" | "past" | "unavailable";
   iso: string;        // toLocalIso(start), para usar como key y al hacer POST
 }
 
@@ -104,23 +103,31 @@ function buildSlots(date: Date, durationMinutes: number, busy: BusySlot[]): Slot
   // los minutos sobre una copia (no muta el original).
   for (let cursor = new Date(dayStart); cursor < dayEnd; cursor = new Date(cursor.getTime() + SLOT_STEP * 60_000)) {
     const start = new Date(cursor);
+    // Fin de ESTA celda de 30 min (no del turno). Sirve para saber si la
+    // celda en sí está ocupada por un turno existente.
+    const cellEnd = new Date(start.getTime() + SLOT_STEP * 60_000);
+    // Fin que tendría el turno NUEVO si arrancara acá (puede abarcar
+    // varias celdas según la duración del servicio).
     const end = new Date(start.getTime() + durationMinutes * 60_000);
 
-    // Si el turno termina después del cierre, no lo ofrecemos.
-    if (end > dayEnd) break;
-
-    // ¿Pisa algún busy? Si sí, marcamos ocupado.
-    const isBusy = busyRanges.some((r) => overlaps(start, end, r.start, r.end));
-    // ¿Ya pasó? El back valida @Future, así que igual lo bloquearía,
-    // pero es mejor UX no mostrarlo activable.
+    // ¿La celda cae dentro de un turno ya reservado? → OCUPADO (rojo).
+    // Usamos cellEnd (30 min), no la duración del turno nuevo, para que
+    // el rango pintado coincida con el horario real del turno existente.
+    const isOccupied = busyRanges.some((r) => overlaps(start, cellEnd, r.start, r.end));
+    // ¿Ya pasó? El back valida @Future, pero es mejor UX no ofrecerlo.
     const isPast = start < now;
+    // La celda está libre, pero ¿entra un turno de esta duración?
+    // No entra si se pasa del cierre o si pisaría un turno posterior.
+    const fits =
+      end <= dayEnd && !busyRanges.some((r) => overlaps(start, end, r.start, r.end));
 
-    slots.push({
-      start,
-      end,
-      state: isBusy ? "busy" : isPast ? "past" : "free",
-      iso: toLocalIso(start),
-    });
+    let state: Slot["state"];
+    if (isOccupied) state = "busy";
+    else if (isPast) state = "past";
+    else if (!fits) state = "unavailable";
+    else state = "free";
+
+    slots.push({ start, end, state, iso: toLocalIso(start) });
   }
 
   return slots;
@@ -248,20 +255,9 @@ function Booking() {
 
   // ------ Render -------------------------------------------------------
 
-  // Caso 1: no logueado → no hay forma de reservar.
-  if (!authed) {
-    return (
-      <section className="booking-section">
-        <h1>Reservar turno</h1>
-        <p>
-          Tenés que <Link to="/login">iniciar sesión</Link> para reservar un turno.
-          ¿No tenés cuenta? <Link to="/register">Registrate</Link>.
-        </p>
-      </section>
-    );
-  }
+  // La ruta está protegida por <RequireAuth>, así que acá ya hay sesión.
 
-  // Caso 2: cargando catálogos iniciales.
+  // Caso: cargando catálogos iniciales.
   if (loadingCatalog) {
     return (
       <section className="booking-section">
@@ -296,10 +292,19 @@ function Booking() {
           <option value="">Elegí un servicio...</option>
           {services.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.name} — {s.durationMinutes} min — ${Number(s.price).toFixed(2)}
+              {s.name}
             </option>
           ))}
         </select>
+
+        {/* Info del servicio elegido (duración y precio) fuera del <option>,
+            que en mobile quedaba largo y se truncaba. */}
+        {selectedService && (
+          <p className="field-hint">
+            <span>{selectedService.durationMinutes} min</span>
+            <span>${Number(selectedService.price).toFixed(2)}</span>
+          </p>
+        )}
 
         {/* ----- Paso 2: profesional (solo si hay servicio) ----- */}
         {serviceId && (
@@ -360,6 +365,7 @@ function Booking() {
                     title={
                       s.state === "busy" ? "Ocupado" :
                       s.state === "past" ? "Ya pasó" :
+                      s.state === "unavailable" ? "No entra un turno de esta duración" :
                       `${formatTime(s.start)} - ${formatTime(s.end)}`
                     }
                   >
@@ -371,6 +377,7 @@ function Booking() {
             <p className="slot-legend">
               <span className="slot slot-free legend-chip"></span> Disponible
               <span className="slot slot-busy legend-chip"></span> Ocupado
+              <span className="slot slot-unavailable legend-chip"></span> No entra
               <span className="slot slot-past legend-chip"></span> Ya pasó
             </p>
           </>

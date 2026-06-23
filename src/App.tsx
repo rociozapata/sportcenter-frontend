@@ -11,6 +11,7 @@ import Services from './pages/Services/Services'
 import Booking from './pages/Booking/Booking'
 import AdminLayout from './pages/Admin/AdminLayout'
 import ProtectedAdminRoute from './pages/Admin/ProtectedAdminRoute'
+import RequireAuth from './components/RequireAuth'
 import Dashboard from './pages/Admin/Dashboard'
 import Users from './pages/Admin/Users'
 import AdminServices from './pages/Admin/Services'
@@ -26,10 +27,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/perfil" element={<Profile />} />
-          <Route path="/configuracion" element={<Configuration />} />
+          <Route path="/perfil" element={<RequireAuth><Profile /></RequireAuth>} />
+          <Route path="/configuracion" element={<RequireAuth><Configuration /></RequireAuth>} />
           <Route path="/servicios" element={<Services />} />
-          <Route path="/turnos" element={<Booking />} />
+          <Route path="/turnos" element={<RequireAuth><Booking /></RequireAuth>} />
           <Route
             path="/admin"
             element={

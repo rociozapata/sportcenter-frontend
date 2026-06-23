@@ -1,0 +1,52 @@
+/* Pantalla mostrada cuando se intenta entrar a una sección que
+   requiere sesión sin estar logueado. */
+
+.auth-gate {
+    max-width: 520px;
+    margin: 64px auto;
+    padding: 0 20px;
+}
+
+.auth-gate-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 36px 32px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(26, 54, 93, 0.06);
+}
+
+.auth-gate-card h1 {
+    color: var(--primary);
+    font-size: 1.6rem;
+    margin: 0 0 12px;
+}
+
+.auth-gate-card p {
+    color: #4a5568;
+    margin: 0 0 24px;
+    line-height: 1.55;
+}
+
+.auth-gate-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* En mobile los botones ocupan todo el ancho, apilados. */
+@media (max-width: 480px) {
+    .auth-gate {
+        margin: 40px auto;
+    }
+
+    .auth-gate-card {
+        padding: 28px 20px;
+    }
+
+    .auth-gate-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
