@@ -1,12 +1,14 @@
 /* Pantalla mostrada cuando se intenta entrar a una sección que
    requiere sesión sin estar logueado. */
 
+/* Contenedor centrado y angosto: solo muestra el cartel, no es una página. */
 .auth-gate {
     max-width: 520px;
     margin: 64px auto;
     padding: 0 20px;
 }
 
+/* Tarjeta con el mensaje "necesitás iniciar sesión" y los botones. */
 .auth-gate-card {
     background: #fff;
     border: 1px solid #e2e8f0;
@@ -28,6 +30,8 @@
     line-height: 1.55;
 }
 
+/* Botones (Iniciar sesión / Registrarse) centrados, con wrap por si
+   no entran en una línea en pantallas chicas. */
 .auth-gate-actions {
     display: flex;
     gap: 12px;

@@ -36,10 +36,20 @@ import "./Booking.css";
 
 // ----- Constantes del horario de atención -------------------------------
 
-const OPEN_HOUR = 8;     // abre 08:00
-const CLOSE_HOUR = 22;   // cierra 22:00
 const SLOT_STEP = 30;    // un slot cada 30 minutos
 const MAX_ADVANCE_DAYS = 14;  // no se puede reservar con más de 2 semanas
+
+// Horario de atención por día (coincide con el footer):
+//   Lun-Vie: 8:00 - 22:00
+//   Sáb:     9:00 - 14:00
+//   Dom:     cerrado
+// Devuelve { open, close } en horas, o null si ese día está cerrado.
+function dayHours(d: Date): { open: number; close: number } | null {
+  const day = d.getDay(); // 0 = domingo … 6 = sábado
+  if (day === 0) return null;                  // domingo cerrado
+  if (day === 6) return { open: 9, close: 14 }; // sábado
+  return { open: 8, close: 22 };               // lunes a viernes
+}
 
 // Días de la semana, arrancando en lunes (como la tira del diseño).
 const WEEKDAYS_MON = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -103,10 +113,14 @@ function buildSlots(date: Date, durationMinutes: number, busy: BusySlot[]): Slot
   const slots: Slot[] = [];
   const now = new Date();
 
+  // Si el centro está cerrado ese día (domingo), no hay slots.
+  const hours = dayHours(date);
+  if (!hours) return slots;
+
   const dayStart = new Date(date);
-  dayStart.setHours(OPEN_HOUR, 0, 0, 0);
+  dayStart.setHours(hours.open, 0, 0, 0);
   const dayEnd = new Date(date);
-  dayEnd.setHours(CLOSE_HOUR, 0, 0, 0);
+  dayEnd.setHours(hours.close, 0, 0, 0);
 
   const busyRanges = busy.map((b) => ({
     start: new Date(b.startTime),
@@ -176,7 +190,12 @@ function Booking() {
 
   // ------ Selección del usuario ----------------------------------------
   const [serviceId, setServiceId] = useState<number | "">("");
-  const [date, setDate] = useState(toLocalDate(new Date()));
+  // Arrancamos en el primer día abierto desde hoy (evita caer en domingo).
+  const [date, setDate] = useState(() => {
+    let d = startOfDay(new Date());
+    for (let i = 0; i < 7 && !dayHours(d); i++) d = addDays(d, 1);
+    return toLocalDate(d);
+  });
   const [weekStart, setWeekStart] = useState(() => mondayOfWeek(new Date()));
   const [selectedProId, setSelectedProId] = useState<number | "">("");
   const [slotIso, setSlotIso] = useState<string | "">("");
@@ -270,7 +289,8 @@ function Booking() {
 
   function isSelectableDay(day: Date) {
     const d = startOfDay(day);
-    return d >= today && d <= maxDate;
+    // Dentro del rango reservable Y que el centro abra ese día.
+    return d >= today && d <= maxDate && dayHours(d) !== null;
   }
 
   function pickDay(day: Date) {

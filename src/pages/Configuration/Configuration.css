@@ -2,6 +2,8 @@
    Configuracion (/configuracion) — formulario de edición de cuenta.
    ============================================================ */
 
+/* Contenedor centrado y de ancho acotado para que el formulario
+   no se estire en pantallas grandes. */
 .config-section {
     max-width: 720px;
     margin: 48px auto;
@@ -9,6 +11,8 @@
     color: #1a202c;
 }
 
+/* Link "volver" que es un <button> por accesibilidad, pero al que le
+   sacamos el aspecto de botón (sin fondo ni borde) para que parezca texto. */
 .config-back {
     background: none;
     border: none;
@@ -37,12 +41,14 @@
     font-size: 0.98rem;
 }
 
+/* El formulario apila las tarjetas (cada una agrupa un set de campos). */
 .config-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+/* Tarjeta blanca que agrupa un bloque de campos (ej. datos personales). */
 .config-card {
     background: #fff;
     border: 1px solid #e2e8f0;
@@ -82,12 +88,15 @@
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+/* Al enfocar reemplazamos el outline nativo por un "anillo" propio
+   (box-shadow) del color de marca, más prolijo y coherente con el diseño. */
 .config-card input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.12);
 }
 
+/* Dato de solo lectura (ej. email de la cuenta, que no se edita acá). */
 .config-readonly {
     margin: 14px 0 0;
     color: #4a5568;
@@ -99,6 +108,7 @@
     margin-left: 4px;
 }
 
+/* Botones del form (Guardar / Cancelar) alineados a la derecha. */
 .config-actions {
     display: flex;
     justify-content: flex-end;
@@ -106,6 +116,7 @@
     margin-top: 4px;
 }
 
+/* Mensaje de error: rojo suave. */
 .config-error {
     color: #9b2c2c;
     background: #fff5f5;
@@ -115,6 +126,7 @@
     margin: 0;
 }
 
+/* Mensaje de éxito al guardar: verde suave. */
 .config-success {
     color: #22543d;
     background: #ebfaf0;
@@ -124,6 +136,8 @@
     margin: 0;
 }
 
+/* Mobile: en vez de quedar a la derecha, los botones se apilan a lo
+   ancho. column-reverse deja el botón principal (Guardar) arriba. */
 @media (max-width: 540px) {
     .config-card {
         padding: 18px 18px;

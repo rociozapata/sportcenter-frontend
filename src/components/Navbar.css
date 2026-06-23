@@ -1,3 +1,6 @@
+/* Barra superior: logo a la izquierda y el menú a la derecha
+   (space-between). position:relative la deja como ancla para el
+   dropdown del perfil y el backdrop del drawer mobile. */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -19,6 +22,9 @@
     text-decoration: none;
 }
 
+/* Agrupa links + acciones (auth) y los empuja a la derecha con
+   justify-content:flex-end. En mobile este mismo bloque se convierte
+   en el drawer lateral (ver media query). */
 .navbar-menu {
     display: flex;
     align-items: center;
@@ -27,6 +33,7 @@
     justify-content: flex-end;
 }
 
+/* Links de navegación en fila. */
 .navbar-links {
     display: flex;
     gap: 24px;
@@ -45,6 +52,7 @@
 /* .nav-button fue reemplazado por las clases globales .btn .btn-accent
    definidas en src/styles/buttons.css. */
 
+/* Zona de acciones a la derecha (botón "Reservar", login, perfil). */
 .navbar-auth {
     display: flex;
     align-items: center;
@@ -56,7 +64,8 @@
     align-items: center;
 }
 
-/* Perfil con dropdown e indicador de sesión */
+/* Perfil con dropdown e indicador de sesión.
+   position:relative ancla el menú flotante (.navbar-profile-menu). */
 
 .navbar-profile {
     position: relative;
@@ -64,6 +73,8 @@
     align-items: center;
 }
 
+/* Botón con el avatar que abre/cierra el dropdown. relative para
+   posicionar encima el puntito de "en línea". */
 .navbar-profile-trigger {
     position: relative;
     display: flex;
@@ -86,6 +97,8 @@
     display: none;
 }
 
+/* Puntito verde sobre la esquina del avatar: indica sesión iniciada.
+   El borde del color del navbar lo hace "recortar" el avatar. */
 .navbar-profile-dot {
     position: absolute;
     bottom: 2px;
@@ -97,6 +110,8 @@
     border-radius: 50%;
 }
 
+/* Dropdown flotante. Se ancla bajo el trigger (top: 100% + 8px de aire)
+   y alineado a la derecha. z-index alto para quedar sobre el contenido. */
 .navbar-profile-menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -112,6 +127,7 @@
     z-index: 20;
 }
 
+/* Cabecera del dropdown con nombre + email, separada por una línea. */
 .navbar-profile-header {
     display: flex;
     flex-direction: column;
@@ -126,6 +142,7 @@
     font-size: 0.95rem;
 }
 
+/* Email largo: lo cortamos con "..." para que no rompa el ancho del menú. */
 .navbar-profile-email {
     color: #6b6375;
     font-size: 0.8rem;
@@ -134,6 +151,8 @@
     white-space: nowrap;
 }
 
+/* Items del menú: <a> (links) y <button> (logout) con la misma pinta.
+   Reseteamos estilos nativos del button para que iguale a los links. */
 .navbar-profile-menu a,
 .navbar-profile-menu button {
     text-align: left;
@@ -153,8 +172,8 @@
     text-decoration: none;
 }
 
-/* Navbar menu hamburguesa responsive celular*/
-
+/* Botón hamburguesa (solo mobile). Oculto en desktop; el media query
+   lo muestra. Son tres <span> apilados que forman las "tres rayitas". */
 .navbar-toggle {
     display: none;
     flex-direction: column;
@@ -168,6 +187,7 @@
     z-index: 10;
 }
 
+/* Cada una de las tres rayitas. */
 .navbar-toggle span {
     display: block;
     width: 100%;
@@ -178,6 +198,11 @@
     transform-origin: center;
 }
 
+/* Estado abierto (.is-open): la hamburguesa se transforma en una "X".
+   - 1ra rayita: baja hasta el centro y rota 45°
+   - 2da rayita: se desvanece (queda invisible)
+   - 3ra rayita: sube hasta el centro y rota -45°
+   Las dos diagonales cruzadas forman la X. */
 .navbar-toggle.is-open span:nth-child(1) {
     transform: translateY(9.5px) rotate(45deg);
 }
@@ -345,6 +370,7 @@
     }
 }
 
+/* Fundido de entrada del backdrop oscuro al abrir el drawer. */
 @keyframes navbar-fade-in {
     from { opacity: 0; }
     to { opacity: 1; }

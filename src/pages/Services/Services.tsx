@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import "./Services.css"
+// Importamos cada imagen: Vite las procesa y nos devuelve la URL final.
+// Hacerlo por import (en vez de strings sueltos) asegura que la imagen
+// entre en la build y rompe en compilación si el archivo no existe.
 import tenisImg from "/src/assets/service-tenis.jpg";
 import padelImg from "/src/assets/service-padel.jpg";
 import futbolImg from "/src/assets/service-futbol.jpg";
@@ -12,6 +15,12 @@ import staffFutbolImg from "/src/assets/staff-futbol.jpg";
 import staffFuncionalImg from "/src/assets/staff-funcional.webp";
 import staffCrossfitImg from "/src/assets/staff-crossfit.webp";
 
+// Datos de las disciplinas. Los separamos del JSX para renderizar las
+// 5 filas con un solo .map() en vez de escribir 5 bloques iguales.
+// - key:         id único para React y para la clase CSS
+// - tag:         etiqueta corta arriba del título
+// - description: texto largo de la fila
+// - img:         imagen importada arriba
 const service = [
     {
         key: "tenis",
@@ -54,6 +63,7 @@ const service = [
     }
 ];
 
+// Mismo enfoque para el staff: un array que después mapeamos a cards.
 const staff = [
     { key: "tenis", name: "Natalia", role: "Tenis", specialty: "Ex selección nacional · 8 años", img: staffTenisImg },
     { key: "padel", name: "Gonzalo", role: "Padel", specialty: "Categoría 3 AJPP · 12 años", img: staffPadelImg },
@@ -62,6 +72,9 @@ const staff = [
     { key: "crossfit", name: "Facundo", role: "Crossfit", specialty: "CrossFit Level 2 Trainer", img: staffCrossfitImg },
 ];
 
+// Página pública /servicios. Es informativa (no pega a la API):
+// muestra las disciplinas, una frase de marca, el staff y un CTA final.
+// Todos los datos salen de los arrays de arriba.
 function Services() {
     return (
         <>
@@ -84,7 +97,8 @@ function Services() {
                 </div>
             </section>
 
-            {/* seccio servicios */}
+            {/* Sección de disciplinas en "zig-zag": el CSS alterna el lado
+                de la imagen en filas pares/impares. */}
             <section className="services">
                 <div className="services-container">
                     <header className="services-section-head">
@@ -95,6 +109,8 @@ function Services() {
                     </header>
 
                     <div className="services-zigzag">
+                        {/* i es el índice del .map; lo usamos para el numerito
+                            "01", "02"… (0{i+1}, porque i arranca en 0). */}
                         {service.map((s, i) => (
                             <article key={s.key} className="services-zigzag-row">
 
@@ -126,7 +142,7 @@ function Services() {
                 </div>
             </section>
 
-            {/* seccion staff */}
+            {/* Sección del staff: grilla de cards, una por entrenador. */}
             <section className="staff-section">
                 <div className="staff-container">
                     <div className="staff-header">
