@@ -35,6 +35,12 @@ function Login() {
   const [searchParams] = useSearchParams();
   const expired = searchParams.get("expired") === "1";
 
+  // Si un guard nos mandó acá, trae ?redirect=/ruta-destino. Después del
+  // login volvemos ahí. Solo aceptamos rutas internas (empiezan con "/")
+  // para no redirigir a sitios externos (open redirect).
+  const redirectParam = searchParams.get("redirect");
+  const redirectTo = redirectParam && redirectParam.startsWith("/") ? redirectParam : "/";
+
   // Función que se ejecuta cuando el usuario aprieta "Ingresar".
   async function handleSubmit(e: FormEvent) {
     // Evitamos que el browser recargue la página (comportamiento default del form).
@@ -50,8 +56,8 @@ function Login() {
       // Llamamos al servicio. Si funciona, ya quedó el token en localStorage.
       await login({ email, password });
 
-      // Login OK → redirigimos al home.
-      navigate("/");
+      // Login OK → volvemos a donde el usuario quería ir (o al home).
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       // Si auth.ts lanzó Error, mostramos su mensaje al usuario.
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesión");

@@ -1,187 +1,434 @@
+/* ============================================================
+   Services (/servicios) — landing de disciplinas + staff.
+   ============================================================ */
 
-.services {
-    background-color: #ffffff; 
-    padding-bottom: 4rem; 
+/* ----- HERO ---------------------------------------------------------- */
+
+.services-hero {
+    position: relative;
+    background: linear-gradient(135deg, #24467a 0%, var(--primary) 55%, #122544 100%);
+    color: #fff;
+    padding: 5rem 2rem 5.5rem;
+    overflow: hidden;
 }
 
-.services-zigzag{
+/* Decoración de fondo: dos círculos suaves para dar profundidad. */
+.services-hero::before,
+.services-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+.services-hero::before {
+    width: 460px;
+    height: 460px;
+    background: var(--secondary);
+    top: -160px;
+    right: -120px;
+}
+
+.services-hero::after {
+    width: 320px;
+    height: 320px;
+    background: #fff;
+    bottom: -140px;
+    left: -80px;
+}
+
+.services-hero-inner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    z-index: 1;
+}
+
+.services-hero-eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 1rem;
+}
+
+.services-hero-title {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 1rem;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.services-hero-accent {
+    color: var(--secondary);
+    position: relative;
+    white-space: nowrap;
+}
+
+.services-hero-accent::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 4px;
+    background: var(--secondary);
+    border-radius: 2px;
+    opacity: 0.4;
+}
+
+.services-hero-subtitle {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 640px;
+    margin: 0 0 2.5rem;
+}
+
+.services-hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.services-hero-stats > div {
     display: flex;
     flex-direction: column;
-    gap: 4rem;
-    margin-top: 3rem;   
+    gap: 4px;
 }
+
+.services-hero-stats strong {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--secondary);
+    line-height: 1;
+}
+
+.services-hero-stats span {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ----- Sección Servicios (zig-zag) ---------------------------------- */
+
+.services {
+    background-color: #ffffff;
+    padding: 4rem 0;
+}
+
+.services-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.services-section-head {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.services-zigzag {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    margin-top: 1rem;
+}
+
 .services-header {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 800;
     color: var(--primary);
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
+}
+
+.services-section-lead {
+    color: #4a5568;
+    font-size: 1.05rem;
+    margin: 0;
 }
 
 .services-zigzag-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;  /* Cada fila es un Grid de 2 columnas iguales (Foto | Texto) */
-    gap: 4rem;
-    align-items: center; /* Centra el texto verticalmente respecto a la foto */
-}
-
-/* filas impares borde contenedor */
-.services-zigzag-row:nth-child(odd){
-    background-color: transparent;
-    border: 1px solid #798088;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    padding: 2rem;
     border-radius: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* El truco mágico: A las filas PARES (2, 4...) les damos vuelta el orden */
+.services-zigzag-row:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(26, 54, 93, 0.12);
+}
+
+/* filas impares (1, 3, 5): borde sutil sobre fondo blanco */
+.services-zigzag-row:nth-child(odd) {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+}
+
+/* filas pares (2, 4): fondo primary, orden invertido */
 .services-zigzag-row:nth-child(even) {
-    direction: rtl; /* Hace que el grid empiece a dibujar desde la derecha */
+    direction: rtl;
     background-color: var(--primary);
-    border-radius: 16px;
-    border: 1px solid transparent;  /*  Borde fantasma para emparejar el tamaño */
-    
+    border: 1px solid transparent;
 }
 
-/* Restauramos la dirección del texto adentro del contenido par para que no se lea al revés */
 .services-zigzag-row:nth-child(even) .services-zigzag-content {
-    direction: ltr; /* Texto normal de izquierda a derecha */
-    
+    direction: ltr;
 }
 
 .services-zigzag-img {
+    position: relative;
     width: 100%;
-    height: 100%; /* Un buen alto para que luzca la disciplina */
-    border-radius: 16px;
+    height: 320px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(10, 25, 41, 0.1);
+    box-shadow: 0 8px 24px rgba(10, 25, 41, 0.15);
 }
 
 .services-zigzag-img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.6s ease;
+}
+
+.services-zigzag-row:hover .services-zigzag-img img {
+    transform: scale(1.06);
+}
+
+/* Numerito decorativo arriba a la izq de la imagen. */
+.services-zigzag-index {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: var(--secondary);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .services-zigzag-content {
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
-.services-zigzag-title {
-    font-size: 2rem;
-    font-weight: 800;
+/* Tag pequeño arriba del título, distinto color según fila. */
+.services-zigzag-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--primary);
+    background: rgba(173, 255, 47, 0.18);
+    padding: 5px 12px;
+    border-radius: 999px;
     margin-bottom: 1rem;
 }
 
-/* primero apunto al contenedor y luego lo que puntualmente quiero cambiar */
-.services-zigzag-row:nth-child(even) .services-zigzag-title{
+.services-zigzag-row:nth-child(even) .services-zigzag-tag {
+    color: var(--secondary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.services-zigzag-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0 0 1rem;
+    line-height: 1.2;
+}
+
+.services-zigzag-row:nth-child(even) .services-zigzag-title {
     color: var(--neutral);
 }
 
 .services-zigzag-description {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: #798088;
-    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #4a5568;
+    margin: 0 0 1.75rem;
 }
 
+.services-zigzag-row:nth-child(even) .services-zigzag-description {
+    color: rgba(255, 255, 255, 0.85);
+}
 
 @media (max-width: 768px) {
     .services-zigzag-row {
-        grid-template-columns: 1fr; /* Una sola columna */
-        gap: 2rem;
-        padding: 1.5rem;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.25rem;
     }
 
-    /* En el celular, la foto siempre arriba y el texto abajo.
-       Con esto le decimos que no importa el orden original, la foto va primero (order: 1) 
-       y el bloque de texto va segundo (order: 2). */
+    .services-zigzag-row:nth-child(even) {
+        direction: ltr;
+    }
+
     .services-zigzag-img {
-        order: 1; 
-        height: 240px; /* En el celu sí le fijamos un alto lindo a la caja */
-        width: 100%;
+        height: 220px;
     }
 
-    .services-zigzag-content{
-        order: 2;
-    }
-    
-    .services-zigzag-img{
-        height: 100%; 
-        object-fit: cover;
+    .services-zigzag-title {
+        font-size: 1.5rem;
     }
 }
 
-/* BARRA DIVISORIA */
+/* ----- BANDA DE TRANSICIÓN (cita de marca, corte diagonal) ---------- */
 
-.brand-divider-bar {
-    width: 100%;
-    height: 40px; 
-    background-color: var(--primary); 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
+.brand-quote {
     position: relative;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2); /* Sombreado interno para darle profundidad */
+    background: linear-gradient(135deg, #24467a 0%, var(--primary) 50%, #122544 100%);
+    color: #fff;
+    padding: 7rem 2rem;
+    text-align: center;
+    overflow: hidden;
+    /* Corte diagonal: el bloque entra como una "cinta" inclinada entre
+       las secciones blancas. Los puntos son x% y%. */
+    clip-path: polygon(0 8%, 100% 0, 100% 92%, 0 100%);
 }
 
-.brand-divider-text {
+.brand-quote-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.brand-quote-mark {
+    display: block;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 5rem;
+    line-height: 0.8;
     color: var(--secondary);
-    font-size: 0.85rem;
-    font-weight: 800;
-    
+    margin-bottom: 0.5rem;
 }
 
-/*  SECCIÓN STAFF */
+.brand-quote-text {
+    font-size: clamp(1.2rem, 2.6vw, 1.7rem);
+    font-weight: 500;
+    line-height: 1.5;
+    color: #fff;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.005em;
+}
+
+.brand-quote-sign {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--secondary);
+}
+
+/* ----- SECCIÓN STAFF ------------------------------------------------ */
+
 .staff-section {
     width: 100%;
-    background-color: #ffffff;
-    padding-top: 4rem;
-    padding-bottom: 5rem;
+    background-color: #f7fafc;
+    padding: 4rem 0 5rem;
 }
 
 .staff-container {
-    max-width: 1200px; /* El mismo ancho máximo que seguro usan tus servicios */
-    margin: 0 auto;    
-    padding: 0 2rem;   
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.staff-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.staff-eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: rgba(173, 255, 47, 0.18);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 1rem;
 }
 
 .staff-intro {
-    max-width: 800px;
-    font-size: 1.1rem;
-    line-height: 1.6;
+    max-width: 720px;
+    margin: 1rem auto 0;
+    font-size: 1.05rem;
+    line-height: 1.65;
     color: #4a5568;
-    margin-bottom: 3rem;
 }
 
-/* Grilla inteligente: se acomoda a 3 columnas, pero centra los elementos de las filas incompletas */
 .staff-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales por fila */
-    gap: 2rem; /* Un poco más de aire entre profes */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
     justify-content: center;
 }
 
-/* Tarjeta del Profe (Diseño de bloques: Foto arriba, texto abajo) */
 .staff-card {
+    position: relative;
     display: flex;
-    flex-direction: column; /* Hace que el contenido se apile verticalmente */
-    height: 380px; /* Le damos un poco más de alto total */
-    border-radius: 12px;
+    flex-direction: column;
+    height: 420px;
+    border-radius: 16px;
     overflow: hidden;
-    background-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #1e2a3a;
+    box-shadow: 0 4px 14px rgba(26, 54, 93, 0.08);
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
-/* Contenedor de la foto: ahora ocupa el 75% de la tarjeta */
+.staff-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    border: 2px solid transparent;
+    pointer-events: none;
+    transition: border-color 0.3s ease;
+    z-index: 3;
+}
+
+.staff-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 34px rgba(26, 54, 93, 0.28);
+}
+
+.staff-card:hover::before {
+    border-color: var(--secondary);
+}
+
 .staff-card-img {
     position: relative;
     width: 100%;
-    height: 80%; 
+    height: 72%;
     overflow: hidden;
+}
+
+.staff-card-img::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(30, 42, 58, 0.55) 100%);
+    pointer-events: none;
 }
 
 .staff-card-img img {
@@ -189,46 +436,109 @@
     height: 100%;
     object-fit: cover;
     object-position: top;
-    transition: transform 0.4s ease;
+    transition: transform 0.6s ease;
 }
 
-/* Bloque de texto: ahora vive ABAJO de la foto, sobre fondo oscuro sólido */
+.staff-card:hover .staff-card-img img {
+    transform: scale(1.08);
+}
+
+/* Píldora con la disciplina, superpuesta arriba a la izquierda. */
+.staff-card-discipline {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    background: var(--secondary);
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
 .staff-card-info {
+    position: relative;
     width: 100%;
-    height: 20%; /* Ocupa el espacio restante */
-    padding: 1rem 1.25rem;
+    height: 28%;
+    padding: 1.1rem 1.4rem;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centra el texto verticalmente en su cajita */
-    background-color: #1e2a3a; 
+    justify-content: center;
+    background-color: #1e2a3a;
     z-index: 2;
 }
 
+/* Línea acento arriba del nombre. */
+.staff-card-info::before {
+    content: "";
+    display: block;
+    width: 32px;
+    height: 3px;
+    background: var(--secondary);
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    transition: width 0.3s ease;
+}
+
+.staff-card:hover .staff-card-info::before {
+    width: 56px;
+}
+
 .staff-card-name {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: var(--neutral); 
-    margin: 0 0 0.15rem 0;
+    color: var(--neutral);
+    margin: 0 0 0.2rem 0;
+    letter-spacing: -0.005em;
 }
 
-.staff-card-role {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--secondary); 
+.staff-card-specialty {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
     margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    line-height: 1.35;
 }
 
-/* --- RESPONSIVO --- */
 @media (max-width: 900px) {
     .staff-grid {
-        grid-template-columns: repeat(2, 1fr); /* En tablet se ven de a 2 */
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 550px) {
     .staff-grid {
-        grid-template-columns: 1fr; /* En celu, 1 por fila */
+        grid-template-columns: 1fr;
     }
+}
+
+/* ----- CTA FINAL ---------------------------------------------------- */
+
+.services-cta {
+    background: linear-gradient(135deg, var(--primary) 0%, #122544 100%);
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #fff;
+}
+
+.services-cta-inner {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.services-cta h2 {
+    color: #fff;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+}
+
+.services-cta p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem;
+    margin: 0 0 2rem;
 }

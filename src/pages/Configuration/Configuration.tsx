@@ -112,6 +112,9 @@ function Configuration() {
         }
     }
 
+    // Tres "guardas" antes del form real, en orden de prioridad:
+    // 1) sin sesión, 2) cargando datos, 3) error/sin datos. Cada una
+    // hace un return temprano para no renderizar el form sin datos válidos.
     if (!authed) {
         return (
             <section className="config-section">
@@ -150,6 +153,8 @@ function Configuration() {
             <p className="config-subtitle">Editá tus datos personales y tu contraseña.</p>
 
             <form className="config-form" onSubmit={handleSubmit}>
+                {/* Tarjeta 1: datos básicos editables. Los inputs son
+                    "controlados" (value + onChange ligados al estado). */}
                 <div className="config-card">
                     <h2>Datos personales</h2>
 
@@ -181,6 +186,8 @@ function Configuration() {
                     </p>
                 </div>
 
+                {/* Tarjeta 2: cambio de contraseña, opcional. Si se deja
+                    vacía, handleSubmit no manda password al back. */}
                 <div className="config-card">
                     <h2>Cambiar contraseña</h2>
                     <p className="config-help">

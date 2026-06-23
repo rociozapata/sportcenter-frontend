@@ -22,6 +22,20 @@ import {
 
 const PAGE_SIZE = 10;
 
+// Iniciales para el avatar (no hay fotos en el modelo de datos).
+function initialsOf(name: string): string {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join("") || "?";
+}
+
+// Ventana de páginas para la paginación numerada.
+function pageWindow(current: number, total: number): number[] {
+  const pages: number[] = [];
+  const start = Math.max(0, Math.min(current - 2, total - 5));
+  const end = Math.min(total, Math.max(current + 3, 5));
+  for (let i = start; i < end; i++) pages.push(i);
+  return pages;
+}
+
 // Form vacío por defecto.
 // active arranca en true: lo normal al crear un profesional es darlo
 // de alta activo. El usuario lo puede desactivar luego.
@@ -45,6 +59,11 @@ function Professionals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Búsqueda GLOBAL (server-side): el back matchea sobre nombre o
+  // especialidad. `query` es lo tipeado; `debouncedQuery` lo que mandamos.
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
   // Estado del form (igual que en Services).
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ProfessionalPayload>(EMPTY_FORM);
@@ -57,7 +76,7 @@ function Professionals() {
     setLoading(true);
     setError(null);
     try {
-      const response = await getProfessionals(targetPage, PAGE_SIZE);
+      const response = await getProfessionals(targetPage, PAGE_SIZE, debouncedQuery);
       setData(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo cargar la lista");
@@ -68,7 +87,17 @@ function Professionals() {
 
   useEffect(() => {
     load(page);
-  }, [page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedQuery]);
+
+  // Debounce de la búsqueda: 350 ms tras la última tecla → página 0.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPage(0);
+      setDebouncedQuery(query.trim());
+    }, 350);
+    return () => clearTimeout(t);
+  }, [query]);
 
   // ------ Carga del catálogo de servicios ------------------------------
 
@@ -166,12 +195,41 @@ function Professionals() {
 
   return (
     <div className="admin-panel">
-      <header className="admin-panel-header">
-        <h1>Profesionales</h1>
-        <button type="button" className="btn btn-primary" onClick={startCreate}>
-          Nuevo profesional
-        </button>
+      <header className="bk-head">
+        <div>
+          <h1>Profesionales</h1>
+          <p className="dash-subtitle">Gestioná el staff y los servicios que dicta cada uno.</p>
+        </div>
+        <div className="pro-head-right">
+          <div className="bk-stats">
+            <div className="bk-stat">
+              <span className="bk-stat-label">Profesionales</span>
+              <span className="bk-stat-value">{data?.totalElements ?? 0}</span>
+            </div>
+            <div className="bk-stat">
+              <span className="bk-stat-label">Servicios</span>
+              <span className="bk-stat-value">{serviceTypes.length}</span>
+            </div>
+          </div>
+          <button type="button" className="btn btn-primary pro-add-btn" onClick={startCreate}>
+            + Nuevo profesional
+          </button>
+        </div>
       </header>
+
+      {/* Búsqueda global (server-side): por nombre o especialidad. */}
+      <div className="bk-filters">
+        <div className="bk-field usr-search">
+          <label htmlFor="pro-q">Buscar profesionales</label>
+          <input
+            id="pro-q"
+            type="search"
+            placeholder="Nombre o especialidad…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
 
       {editingId !== null && (
         <form className="admin-form" onSubmit={handleSubmit}>
@@ -247,69 +305,79 @@ function Professionals() {
 
       {!loading && data && (
         <>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Especialidad</th>
-                <th>Estado</th>
-                <th>Servicios</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.content.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="admin-empty">No hay profesionales todavía.</td>
-                </tr>
-              )}
+          {data.content.length === 0 ? (
+            <p className="admin-empty">
+              {debouncedQuery ? `No hay profesionales que coincidan con "${debouncedQuery}".` : "No hay profesionales todavía."}
+            </p>
+          ) : (
+            <div className="pro-grid">
               {data.content.map((pro) => {
                 const busy = busyIds.has(pro.id);
                 return (
-                  <tr key={pro.id}>
-                    <td>{pro.id}</td>
-                    <td>{pro.name}</td>
-                    <td>{pro.speciality}</td>
-                    <td>{pro.active ? "Activo" : "Inactivo"}</td>
-                    <td>
-                      {/* Si no atiende ninguno mostramos un guion en
-                          vez de un string vacío (más prolijo visualmente). */}
-                      {pro.services.length === 0
-                        ? "—"
-                        : pro.services.map((s) => s.name).join(", ")}
-                    </td>
-                    <td className="admin-row-actions">
+                  <article key={pro.id} className="pro-card">
+                    <div className="pro-card-top">
+                      <span className="pro-avatar">{initialsOf(pro.name)}</span>
+                      <span className={`pro-status pro-status--${pro.active ? "on" : "off"}`}>
+                        {pro.active ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+
+                    <h3 className="pro-name">{pro.name}</h3>
+                    <p className="pro-speciality">{pro.speciality}</p>
+
+                    <div className="pro-services-label">Servicios que dicta</div>
+                    <div className="pro-chips">
+                      {pro.services.length === 0 ? (
+                        <span className="pro-chip pro-chip--empty">Ninguno</span>
+                      ) : (
+                        pro.services.map((s) => (
+                          <span key={s.id} className="pro-chip">{s.name}</span>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="pro-card-actions">
                       <button
                         type="button"
-                        className="btn admin-row-action"
+                        className="pro-edit-btn"
                         disabled={busy}
                         onClick={() => startEdit(pro)}
                       >
-                        Editar
+                        Editar perfil
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger admin-row-action"
+                        className="bk-btn bk-btn--danger"
                         disabled={busy}
                         onClick={() => handleDelete(pro)}
                       >
                         Eliminar
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                  </article>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+          )}
 
-          <div className="admin-pagination">
-            <button type="button" className="btn" disabled={data.first} onClick={() => setPage((p) => Math.max(0, p - 1))}>
-              Anterior
-            </button>
-            <button type="button" className="btn" disabled={data.last} onClick={() => setPage((p) => p + 1)}>
-              Siguiente
-            </button>
+          <div className="bk-pager">
+            <span className="bk-pager-info">
+              {data.totalElements} profesional{data.totalElements === 1 ? "" : "es"} · página {data.number + 1} de {data.totalPages || 1}
+            </span>
+            <div className="bk-pager-nav">
+              <button type="button" className="bk-page-btn" disabled={data.first} onClick={() => setPage((p) => Math.max(0, p - 1))} aria-label="Anterior">‹</button>
+              {pageWindow(data.number, data.totalPages || 1).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`bk-page-btn${p === data.number ? " bk-page-btn--active" : ""}`}
+                  onClick={() => setPage(p)}
+                >
+                  {p + 1}
+                </button>
+              ))}
+              <button type="button" className="bk-page-btn" disabled={data.last} onClick={() => setPage((p) => p + 1)} aria-label="Siguiente">›</button>
+            </div>
           </div>
         </>
       )}

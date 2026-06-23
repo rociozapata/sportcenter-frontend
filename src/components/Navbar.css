@@ -1,3 +1,6 @@
+/* Barra superior: logo a la izquierda y el menú a la derecha
+   (space-between). position:relative la deja como ancla para el
+   dropdown del perfil y el backdrop del drawer mobile. */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -19,6 +22,9 @@
     text-decoration: none;
 }
 
+/* Agrupa links + acciones (auth) y los empuja a la derecha con
+   justify-content:flex-end. En mobile este mismo bloque se convierte
+   en el drawer lateral (ver media query). */
 .navbar-menu {
     display: flex;
     align-items: center;
@@ -27,6 +33,7 @@
     justify-content: flex-end;
 }
 
+/* Links de navegación en fila. */
 .navbar-links {
     display: flex;
     gap: 24px;
@@ -45,6 +52,7 @@
 /* .nav-button fue reemplazado por las clases globales .btn .btn-accent
    definidas en src/styles/buttons.css. */
 
+/* Zona de acciones a la derecha (botón "Reservar", login, perfil). */
 .navbar-auth {
     display: flex;
     align-items: center;
@@ -56,7 +64,8 @@
     align-items: center;
 }
 
-/* Perfil con dropdown e indicador de sesión */
+/* Perfil con dropdown e indicador de sesión.
+   position:relative ancla el menú flotante (.navbar-profile-menu). */
 
 .navbar-profile {
     position: relative;
@@ -64,6 +73,8 @@
     align-items: center;
 }
 
+/* Botón con el avatar que abre/cierra el dropdown. relative para
+   posicionar encima el puntito de "en línea". */
 .navbar-profile-trigger {
     position: relative;
     display: flex;
@@ -80,6 +91,14 @@
     background-color: #f1eef5;
 }
 
+/* La etiqueta de texto del avatar solo se usa en el drawer mobile.
+   En desktop el avatar va solo, así que la ocultamos. */
+.navbar-profile-label {
+    display: none;
+}
+
+/* Puntito verde sobre la esquina del avatar: indica sesión iniciada.
+   El borde del color del navbar lo hace "recortar" el avatar. */
 .navbar-profile-dot {
     position: absolute;
     bottom: 2px;
@@ -91,6 +110,8 @@
     border-radius: 50%;
 }
 
+/* Dropdown flotante. Se ancla bajo el trigger (top: 100% + 8px de aire)
+   y alineado a la derecha. z-index alto para quedar sobre el contenido. */
 .navbar-profile-menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -106,6 +127,7 @@
     z-index: 20;
 }
 
+/* Cabecera del dropdown con nombre + email, separada por una línea. */
 .navbar-profile-header {
     display: flex;
     flex-direction: column;
@@ -120,6 +142,7 @@
     font-size: 0.95rem;
 }
 
+/* Email largo: lo cortamos con "..." para que no rompa el ancho del menú. */
 .navbar-profile-email {
     color: #6b6375;
     font-size: 0.8rem;
@@ -128,6 +151,8 @@
     white-space: nowrap;
 }
 
+/* Items del menú: <a> (links) y <button> (logout) con la misma pinta.
+   Reseteamos estilos nativos del button para que iguale a los links. */
 .navbar-profile-menu a,
 .navbar-profile-menu button {
     text-align: left;
@@ -147,8 +172,8 @@
     text-decoration: none;
 }
 
-/* Navbar menu hamburguesa responsive celular*/
-
+/* Botón hamburguesa (solo mobile). Oculto en desktop; el media query
+   lo muestra. Son tres <span> apilados que forman las "tres rayitas". */
 .navbar-toggle {
     display: none;
     flex-direction: column;
@@ -162,6 +187,7 @@
     z-index: 10;
 }
 
+/* Cada una de las tres rayitas. */
 .navbar-toggle span {
     display: block;
     width: 100%;
@@ -172,6 +198,11 @@
     transform-origin: center;
 }
 
+/* Estado abierto (.is-open): la hamburguesa se transforma en una "X".
+   - 1ra rayita: baja hasta el centro y rota 45°
+   - 2da rayita: se desvanece (queda invisible)
+   - 3ra rayita: sube hasta el centro y rota -45°
+   Las dos diagonales cruzadas forman la X. */
 .navbar-toggle.is-open span:nth-child(1) {
     transform: translateY(9.5px) rotate(45deg);
 }
@@ -184,6 +215,12 @@
     transform: translateY(-9.5px) rotate(-45deg);
 }
 
+/* Backdrop oscuro detrás del drawer. Oculto por defecto (en desktop el
+   drawer no existe); el media query mobile lo activa. */
+.navbar-backdrop {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .navbar {
         padding: 14px 20px;
@@ -193,53 +230,148 @@
         font-size: 24px;
     }
 
+    /* El botón hamburguesa queda por encima del drawer y del backdrop
+       para seguir siendo clickeable (se transforma en X al abrir). */
     .navbar-toggle {
         display: flex;
         margin-left: auto;
+        position: relative;
+        z-index: 1002;
     }
 
+    /* Capa semitransparente que cubre el contenido detrás del drawer. */
+    .navbar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(10, 25, 41, 0.5);
+        z-index: 1000;
+        animation: navbar-fade-in 0.25s ease;
+    }
+
+    /* El menú deja de empujar el contenido: ahora es un panel fijo que
+       entra deslizando desde la derecha. */
     .navbar-menu {
-        display: none;
+        display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
-        gap: 16px;
-        width: 100%;
-        padding: 16px 0 4px;
-        margin-top: 14px;
-        border-top: 1px solid #e5e4e7;
-        order: 3;
+        gap: 8px;
+        position: fixed;
+        top: 0;
+        right: 0;
+        /* Altura ajustada al contenido (no a toda la pantalla) para que no
+           quede espacio en blanco debajo del botón Reservar. Se limita a la
+           altura del viewport por si el contenido fuera más alto. */
+        height: auto;
+        max-height: 100dvh;
+        width: 78%;
+        max-width: 320px;
+        padding: 88px 24px 28px;   /* top deja libre la altura del navbar */
+        margin: 0;
+        background-color: var(--neutral);
+        border-top: none;
+        border-bottom-left-radius: 16px;
+        box-shadow: -8px 8px 24px rgba(10, 25, 41, 0.15);
+        overflow-y: auto;
+        z-index: 1001;
+        /* Estado cerrado: fuera de pantalla a la derecha. */
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
     }
 
     .navbar-menu.is-open {
-        display: flex;
+        transform: translateX(0);
     }
 
     .navbar-links {
         flex-direction: column;
-        align-items: center;
-        gap: 4px;
+        align-items: stretch;
+        gap: 2px;
         width: 100%;
     }
 
     .navbar-links a {
-        font-size: 1.05rem;
-        padding: 10px 4px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #2a2533;
+        padding: 12px 8px;
         width: 100%;
-        text-align: center;
+        text-align: left;
+        border-radius: 8px;
+    }
+
+    .navbar-links a:hover {
+        background-color: #f1eef5;
+        text-decoration: none;
     }
 
     .navbar-auth {
-        justify-content: center;
-        align-items: center;
-        gap: 16px;
-        padding-top: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 16px;
         border-top: 1px solid #e5e4e7;
         width: 100%;
     }
 
-    /* En mobile el CTA "Reservar" estira a todo el ancho del menú. */
-    .navbar-auth .btn {
-        flex: 1;
+    /* El perfil ocupa todo el ancho del drawer. */
+    .navbar-profile {
+        width: 100%;
+        display: block;
     }
+
+    /* El trigger pasa de ser un ícono redondo a una fila completa con
+       avatar + nombre, más fácil de tocar. */
+    .navbar-profile-trigger {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 12px 8px;
+        border-radius: 8px;
+    }
+
+    .navbar-profile-label {
+        display: inline;
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1rem;
+    }
+
+    /* El trigger ahora es una fila ancha, así que reubicamos el punto
+       sobre la esquina inferior derecha del avatar (no del trigger). */
+    .navbar-profile-dot {
+        left: 24px;
+        right: auto;
+        top: 28px;
+        bottom: auto;
+    }
+
+    /* El dropdown del perfil deja de flotar: se despliega inline dentro
+       del drawer, a todo el ancho y sin sombra. */
+    .navbar-profile-menu {
+        position: static;
+        min-width: 0;
+        width: 100%;
+        margin-top: 4px;
+        box-shadow: none;
+        border-color: #ece9f1;
+    }
+
+    /* El CTA "Reservar" a todo el ancho, bien táctil. */
+    .navbar-auth .btn {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
+
+/* Fundido de entrada del backdrop oscuro al abrir el drawer. */
+@keyframes navbar-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

@@ -33,13 +33,13 @@ const facilities = [
 
 function Services() {
     return (
-        <section className="services">
+        <section className="facilities">
             {/* Wave divisor: SVG decorativo que une el fondo oscuro del Hero
                 con el fondo claro de Services. preserveAspectRatio="none" deja
                 que se estire a todo el ancho sin mantener proporciones.
                 aria-hidden porque es puramente decorativo. */}
             <svg
-                className="services-wave"
+                className="facilities-wave"
                 viewBox="0 0 1440 80"
                 preserveAspectRatio="none"
                 aria-hidden="true"
@@ -47,12 +47,12 @@ function Services() {
                 <path d="M0,0 L1440,0 L1440,30 Q720,90 0,30 Z" fill="#0a1929" />
             </svg>
 
-            <div className="services-header">
-                <p className="services-kicker">EQUIPAMIENTO DE PRIMER NIVEL</p>
-                <h2 className="services-title">Nuestras Instalaciones</h2>
+            <div className="facilities-header">
+                <p className="facilities-kicker">EQUIPAMIENTO DE PRIMER NIVEL</p>
+                <h2 className="facilities-title">Nuestras Instalaciones</h2>
             </div>
 
-            <div className="services-grid">
+            <div className="facilities-grid">
                 {/* Recorre el array y renderiza una card por cada instalación.
                     React necesita la prop `key` para identificar cada item
                     de la lista de forma única. */}

@@ -1,28 +1,28 @@
 // ============================================================
-// Booking (pantalla /turnos)
+// Booking (pantalla /turnos) — layout tipo "dashboard"
 // ------------------------------------------------------------
-// Flujo de reserva, en orden:
-//   1. Elegir servicio.
-//   2. Elegir profesional (filtrado: activos que ofrecen ese servicio).
-//   3. Elegir fecha.
-//   4. Elegir slot (grilla cada 30 min).
-//   5. (Opcional) escribir notas y confirmar.
+// Flujo:
+//   1. Elegir deporte (servicio) en cards.
+//   2. Elegir día en la tira semanal.
+//   3. Elegir cancha (= profesional) + horario en su grilla de chips.
+//   4. Confirmar desde el panel lateral de Resumen.
 //
-// Cómo se calculan los slots:
-//   - El centro abre OPEN y cierra CLOSE (constantes abajo).
-//   - Cada slot dura SLOT_STEP minutos.
-//   - El turno reservado dura servicio.durationMinutes minutos
-//     (puede abarcar varios slots).
-//   - Un slot está OCUPADO si su rango [start, start+durationMinutes]
-//     pisa cualquier BusySlot que devolvió el back.
-//   - Un slot está PASADO si su start < ahora.
-//   - El último slot del día tiene que terminar <= CLOSE.
+// Mapeos respecto al modelo de datos:
+//   - "Deporte"  → ServiceType (tiene duración y precio).
+//   - "Cancha"   → Professional (cada uno ofrece ciertos servicios).
+//   - "Horario"  → slots calculados desde la disponibilidad del back.
+//
+// Cálculo de slots: el centro abre OPEN y cierra CLOSE, en pasos de
+// SLOT_STEP min. Un slot es:
+//   - "busy"        si su celda de 30 min cae dentro de un turno reservado.
+//   - "unavailable" si está libre pero un turno de la duración elegida
+//                   no entra (pisaría un turno posterior o el cierre).
+//   - "past"        si ya pasó.
+//   - "free"        disponible.
 // ============================================================
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
 
-import { isAuthenticated } from "../../services/auth";
 import {
   createAppointment,
   getAvailability,
@@ -36,108 +36,168 @@ import "./Booking.css";
 
 // ----- Constantes del horario de atención -------------------------------
 
-// Horario de atención del centro. Si querés hacerlo configurable,
-// se mueve a un endpoint del back o a una variable de entorno.
-const OPEN_HOUR = 8;     // abre 08:00
-const CLOSE_HOUR = 22;   // cierra 22:00
 const SLOT_STEP = 30;    // un slot cada 30 minutos
+const MAX_ADVANCE_DAYS = 14;  // no se puede reservar con más de 2 semanas
+
+// Horario de atención por día (coincide con el footer):
+//   Lun-Vie: 8:00 - 22:00
+//   Sáb:     9:00 - 14:00
+//   Dom:     cerrado
+// Devuelve { open, close } en horas, o null si ese día está cerrado.
+function dayHours(d: Date): { open: number; close: number } | null {
+  const day = d.getDay(); // 0 = domingo … 6 = sábado
+  if (day === 0) return null;                  // domingo cerrado
+  if (day === 6) return { open: 9, close: 14 }; // sábado
+  return { open: 8, close: 22 };               // lunes a viernes
+}
+
+// Días de la semana, arrancando en lunes (como la tira del diseño).
+const WEEKDAYS_MON = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const MONTHS = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
 
 // ----- Helpers de fecha/hora -------------------------------------------
 
-// Formatea un Date al ISO LocalDateTime del back (sin zona).
-// No usamos toISOString() porque convierte a UTC y desfasaría todo.
 function toLocalIso(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
     `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-// Formatea solo la fecha (YYYY-MM-DD) para el filtro de /availability
-// y el input type="date".
 function toLocalDate(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-// Devuelve "HH:mm" para mostrar en cada botón de slot.
 function formatTime(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-// ¿Se pisan dos rangos? Usamos el algoritmo clásico:
-//   overlap = startA < endB  &&  startB < endA
-// Las comparaciones son < estrictas para que "tocarse en el límite"
-// (ej. uno termina 10:00 y otro arranca 10:00) NO cuente como solapado.
+// Medianoche local de una fecha (para comparar días sin la hora).
+function startOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+// Lunes de la semana que contiene a `d`.
+function mondayOfWeek(d: Date): Date {
+  const x = startOfDay(d);
+  const offset = (x.getDay() + 6) % 7; // 0 = lunes
+  x.setDate(x.getDate() - offset);
+  return x;
+}
+
+function addDays(d: Date, days: number): Date {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+
+// ¿Se pisan dos rangos? overlap = startA < endB && startB < endA.
 function overlaps(startA: Date, endA: Date, startB: Date, endB: Date): boolean {
   return startA < endB && startB < endA;
 }
 
-// ----- Estructura de un slot calculado ---------------------------------
+// ----- Slots -----------------------------------------------------------
 
 interface Slot {
   start: Date;
-  end: Date;          // start + durationMinutes (lo que duraría EL TURNO)
-  state: "free" | "busy" | "past";
-  iso: string;        // toLocalIso(start), para usar como key y al hacer POST
+  end: Date;          // start + durationMinutes (lo que duraría el turno)
+  state: "free" | "busy" | "past" | "unavailable";
+  iso: string;
 }
 
-// Construye los slots para un día/servicio/profesional.
-// Pure function: solo input → output, sin efectos. Ideal para useMemo.
 function buildSlots(date: Date, durationMinutes: number, busy: BusySlot[]): Slot[] {
   const slots: Slot[] = [];
   const now = new Date();
 
-  // Rango de apertura del día elegido.
-  const dayStart = new Date(date);
-  dayStart.setHours(OPEN_HOUR, 0, 0, 0);
-  const dayEnd = new Date(date);
-  dayEnd.setHours(CLOSE_HOUR, 0, 0, 0);
+  // Si el centro está cerrado ese día (domingo), no hay slots.
+  const hours = dayHours(date);
+  if (!hours) return slots;
 
-  // Convertimos los busy slots del back a Date una sola vez.
+  const dayStart = new Date(date);
+  dayStart.setHours(hours.open, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setHours(hours.close, 0, 0, 0);
+
   const busyRanges = busy.map((b) => ({
     start: new Date(b.startTime),
     end: new Date(b.endTime),
   }));
 
-  // Iteramos cada SLOT_STEP minutos. El cursor avanza incrementando
-  // los minutos sobre una copia (no muta el original).
   for (let cursor = new Date(dayStart); cursor < dayEnd; cursor = new Date(cursor.getTime() + SLOT_STEP * 60_000)) {
     const start = new Date(cursor);
+    const cellEnd = new Date(start.getTime() + SLOT_STEP * 60_000);
     const end = new Date(start.getTime() + durationMinutes * 60_000);
 
-    // Si el turno termina después del cierre, no lo ofrecemos.
-    if (end > dayEnd) break;
-
-    // ¿Pisa algún busy? Si sí, marcamos ocupado.
-    const isBusy = busyRanges.some((r) => overlaps(start, end, r.start, r.end));
-    // ¿Ya pasó? El back valida @Future, así que igual lo bloquearía,
-    // pero es mejor UX no mostrarlo activable.
+    const isOccupied = busyRanges.some((r) => overlaps(start, cellEnd, r.start, r.end));
     const isPast = start < now;
+    const fits =
+      end <= dayEnd && !busyRanges.some((r) => overlaps(start, end, r.start, r.end));
 
-    slots.push({
-      start,
-      end,
-      state: isBusy ? "busy" : isPast ? "past" : "free",
-      iso: toLocalIso(start),
-    });
+    let state: Slot["state"];
+    if (isOccupied) state = "busy";
+    else if (isPast) state = "past";
+    else if (!fits) state = "unavailable";
+    else state = "free";
+
+    slots.push({ start, end, state, iso: toLocalIso(start) });
   }
 
   return slots;
 }
 
+// ----- Íconos por deporte (SVG inline, sin assets) ---------------------
+
+function sportIcon(name: string) {
+  const n = name.toLowerCase();
+  const common = {
+    width: 26, height: 26, viewBox: "0 0 24 24", fill: "none",
+    stroke: "currentColor", strokeWidth: 1.8,
+    strokeLinecap: "round" as const, strokeLinejoin: "round" as const,
+  };
+  if (n.includes("fútbol") || n.includes("futbol") || n.includes("soccer")) {
+    return (
+      <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7l4 3-1.5 5h-5L8 10z" /></svg>
+    );
+  }
+  if (n.includes("tenis") || n.includes("tennis") || n.includes("pádel") || n.includes("padel")) {
+    return (
+      <svg {...common}><circle cx="9" cy="9" r="6" /><path d="M13.5 13.5L20 20" /></svg>
+    );
+  }
+  if (n.includes("gym") || n.includes("gimnasio") || n.includes("fitness") || n.includes("hiit")) {
+    return (
+      <svg {...common}><path d="M6.5 6.5l11 11M4 9l2-2 2 2-2 2zM16 17l2-2 2 2-2 2zM3 12l3 3M18 6l3 3" /></svg>
+    );
+  }
+  // Genérico.
+  return (
+    <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></svg>
+  );
+}
+
 // ----- Componente ------------------------------------------------------
 
 function Booking() {
-  // ------ Datos del back -----------------------------------------------
+  // ------ Catálogos del back -------------------------------------------
   const [services, setServices] = useState<ServiceType[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [busy, setBusy] = useState<BusySlot[]>([]);
+  // Disponibilidad por profesional para el día elegido: { proId: busySlots }.
+  const [busyByPro, setBusyByPro] = useState<Record<number, BusySlot[]>>({});
 
-  // ------ Estado del flujo --------------------------------------------
+  // ------ Selección del usuario ----------------------------------------
   const [serviceId, setServiceId] = useState<number | "">("");
-  const [professionalId, setProfessionalId] = useState<number | "">("");
-  const [date, setDate] = useState(toLocalDate(new Date())); // por defecto hoy
+  // Arrancamos en el primer día abierto desde hoy (evita caer en domingo).
+  const [date, setDate] = useState(() => {
+    let d = startOfDay(new Date());
+    for (let i = 0; i < 7 && !dayHours(d); i++) d = addDays(d, 1);
+    return toLocalDate(d);
+  });
+  const [weekStart, setWeekStart] = useState(() => mondayOfWeek(new Date()));
+  const [selectedProId, setSelectedProId] = useState<number | "">("");
   const [slotIso, setSlotIso] = useState<string | "">("");
   const [notes, setNotes] = useState("");
 
@@ -148,11 +208,8 @@ function Booking() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const authed = isAuthenticated();
-
-  // ------ Carga inicial (catálogos): una sola vez al montar -----------
+  // ------ Carga inicial de catálogos -----------------------------------
   useEffect(() => {
-    if (!authed) return;
     let cancelled = false;
     Promise.all([listServiceTypes(), listProfessionals()])
       .then(([svc, pros]) => {
@@ -165,50 +222,83 @@ function Booking() {
       })
       .finally(() => { if (!cancelled) setLoadingCatalog(false); });
     return () => { cancelled = true; };
-  }, [authed]);
+  }, []);
 
-  // ------ Profesionales filtrados por servicio elegido ----------------
-  // useMemo evita recalcular el filtro en cada render: solo cuando
-  // cambia el servicio elegido o la lista del back.
-  const filteredPros = useMemo(() => {
+  // ------ Servicio elegido y canchas (profesionales) que lo ofrecen ----
+  const selectedService = useMemo(
+    () => (serviceId ? services.find((s) => s.id === serviceId) ?? null : null),
+    [serviceId, services]
+  );
+
+  const courts = useMemo(() => {
     if (!serviceId) return [];
     return professionals.filter(
       (p) => p.active && p.services.some((s) => s.id === serviceId)
     );
   }, [serviceId, professionals]);
 
-  // Si el profesional que estaba elegido ya no califica al cambiar de
-  // servicio, lo desmarcamos para no enviar un estado inconsistente.
+  // ------ Disponibilidad de TODAS las canchas para el día --------------
+  // Una llamada por profesional, en paralelo. Si una falla, esa cancha
+  // queda sin busy slots (todos libres) en vez de romper la pantalla.
   useEffect(() => {
-    if (professionalId && !filteredPros.some((p) => p.id === professionalId)) {
-      setProfessionalId("");
-      setSlotIso("");
-    }
-  }, [filteredPros, professionalId]);
-
-  // ------ Fetch de disponibilidad cuando hay profesional + fecha ------
-  useEffect(() => {
-    if (!professionalId || !date) {
-      setBusy([]);
+    if (!serviceId || !date || courts.length === 0) {
+      setBusyByPro({});
       return;
     }
     let cancelled = false;
     setLoadingSlots(true);
-    setSlotIso(""); // si cambia profesional/fecha, descartamos el slot anterior
-    getAvailability(professionalId as number, date)
-      .then((res) => { if (!cancelled) setBusy(res.busySlots); })
-      .catch(() => { if (!cancelled) setBusy([]); }) // si falla, mostramos todos como libres
+    setSelectedProId("");
+    setSlotIso("");
+    Promise.all(
+      courts.map((p) =>
+        getAvailability(p.id, date)
+          .then((r) => [p.id, r.busySlots] as const)
+          .catch(() => [p.id, [] as BusySlot[]] as const)
+      )
+    )
+      .then((entries) => {
+        if (!cancelled) setBusyByPro(Object.fromEntries(entries));
+      })
       .finally(() => { if (!cancelled) setLoadingSlots(false); });
     return () => { cancelled = true; };
-  }, [professionalId, date]);
+  }, [serviceId, date, courts]);
 
-  // ------ Slots calculados (memorizados) ------------------------------
-  const slots = useMemo(() => {
-    if (!serviceId || !professionalId) return [];
-    const svc = services.find((s) => s.id === serviceId);
-    if (!svc) return [];
-    return buildSlots(new Date(`${date}T00:00:00`), svc.durationMinutes, busy);
-  }, [serviceId, professionalId, date, busy, services]);
+  // ------ Slot elegido (para el resumen y el submit) -------------------
+  const selectedSlot = useMemo(() => {
+    if (!selectedProId || !slotIso || !selectedService) return null;
+    const slots = buildSlots(
+      new Date(`${date}T00:00:00`),
+      selectedService.durationMinutes,
+      busyByPro[selectedProId] ?? []
+    );
+    return slots.find((s) => s.iso === slotIso) ?? null;
+  }, [selectedProId, slotIso, selectedService, date, busyByPro]);
+
+  const selectedCourt = selectedProId
+    ? courts.find((p) => p.id === selectedProId) ?? null
+    : null;
+
+  // ------ Tira de días de la semana ------------------------------------
+  const today = startOfDay(new Date());
+  // Fecha máxima reservable: hoy + 2 semanas.
+  const maxDate = addDays(today, MAX_ADVANCE_DAYS);
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const canGoPrevWeek = weekStart > mondayOfWeek(today);
+  // Solo dejamos avanzar si la semana siguiente todavía cae dentro del límite.
+  const canGoNextWeek = weekStart < mondayOfWeek(maxDate);
+
+  function isSelectableDay(day: Date) {
+    const d = startOfDay(day);
+    // Dentro del rango reservable Y que el centro abra ese día.
+    return d >= today && d <= maxDate && dayHours(d) !== null;
+  }
+
+  function pickDay(day: Date) {
+    if (!isSelectableDay(day)) return; // fuera del rango reservable
+    setDate(toLocalDate(day));
+    setSelectedProId("");
+    setSlotIso("");
+  }
 
   // ------ Submit -------------------------------------------------------
   async function handleSubmit(e: FormEvent) {
@@ -216,27 +306,26 @@ function Booking() {
     setError(null);
     setSuccessMsg(null);
 
-    if (!serviceId || !professionalId || !slotIso) {
-      setError("Faltan datos: elegí servicio, profesional y horario.");
+    if (!selectedService || !selectedProId || !selectedSlot) {
+      setError("Elegí deporte, día, cancha y horario antes de confirmar.");
       return;
     }
-    const svc = services.find((s) => s.id === serviceId)!;
-    const slot = slots.find((s) => s.iso === slotIso)!;
 
     setSubmitting(true);
     try {
       await createAppointment({
-        startTime: slot.iso,
-        endTime: toLocalIso(slot.end),
+        startTime: selectedSlot.iso,
+        endTime: toLocalIso(selectedSlot.end),
         notes: notes.trim() || undefined,
-        professionalId: professionalId as number,
-        serviceTypeId: svc.id,
+        professionalId: selectedProId as number,
+        serviceTypeId: selectedService.id,
       });
       setSuccessMsg("¡Turno reservado! Vas a recibir la confirmación cuando un admin lo apruebe.");
-      // Refrescamos la disponibilidad para que el slot recién tomado
-      // aparezca como ocupado sin tener que recargar la página.
-      const res = await getAvailability(professionalId as number, date);
-      setBusy(res.busySlots);
+      // Refrescamos la disponibilidad de esa cancha para que el slot
+      // tomado aparezca ocupado sin recargar.
+      const res = await getAvailability(selectedProId as number, date);
+      setBusyByPro((prev) => ({ ...prev, [selectedProId as number]: res.busySlots }));
+      setSelectedProId("");
       setSlotIso("");
       setNotes("");
     } catch (err) {
@@ -248,170 +337,226 @@ function Booking() {
 
   // ------ Render -------------------------------------------------------
 
-  // Caso 1: no logueado → no hay forma de reservar.
-  if (!authed) {
-    return (
-      <section className="booking-section">
-        <h1>Reservar turno</h1>
-        <p>
-          Tenés que <Link to="/login">iniciar sesión</Link> para reservar un turno.
-          ¿No tenés cuenta? <Link to="/register">Registrate</Link>.
-        </p>
-      </section>
-    );
-  }
-
-  // Caso 2: cargando catálogos iniciales.
   if (loadingCatalog) {
     return (
-      <section className="booking-section">
-        <h1>Reservar turno</h1>
-        <p>Cargando opciones...</p>
+      <section className="booking2">
+        <h1 className="booking2-title">Reservá tu turno</h1>
+        <p className="booking2-subtitle">Cargando opciones…</p>
       </section>
     );
   }
 
-  // Helpers para el render del paso 4.
-  const selectedService = serviceId ? services.find((s) => s.id === serviceId) : null;
+  // Fecha legible para el resumen ("Mar 15 oct · 09:30").
+  const summaryWhen = selectedSlot
+    ? `${WEEKDAYS_MON[(new Date(`${date}T00:00:00`).getDay() + 6) % 7]} ${new Date(`${date}T00:00:00`).getDate()} ${MONTHS[new Date(`${date}T00:00:00`).getMonth()].slice(0, 3)} · ${formatTime(selectedSlot.start)}`
+    : null;
 
   return (
-    <section className="booking-section">
-      <h1>Reservar turno</h1>
-      <p className="booking-subtitle">
-        Completá los pasos para agendar tu próximo turno en pocos clics.
-      </p>
+    <section className="booking2">
+      <div className="booking2-grid">
+        {/* ---------- Columna principal ---------- */}
+        <div className="booking2-main">
+          <header className="booking2-head">
+            <h1 className="booking2-title">Reservá tu turno</h1>
+            <p className="booking2-subtitle">Elegí deporte, día, coach y horario.</p>
+          </header>
 
-      <form className="booking-form" onSubmit={handleSubmit}>
-        {/* ----- Paso 1: servicio ----- */}
-        <label htmlFor="b-service"><span className="step-badge">1</span> Servicio</label>
-        <select
-          id="b-service"
-          value={serviceId}
-          onChange={(e) => {
-            setServiceId(e.target.value ? Number(e.target.value) : "");
-            setSlotIso("");
-          }}
-          required
-        >
-          <option value="">Elegí un servicio...</option>
-          {services.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} — {s.durationMinutes} min — ${Number(s.price).toFixed(2)}
-            </option>
-          ))}
-        </select>
-
-        {/* ----- Paso 2: profesional (solo si hay servicio) ----- */}
-        {serviceId && (
-          <>
-            <label htmlFor="b-pro"><span className="step-badge">2</span> Profesional</label>
-            {filteredPros.length === 0 ? (
-              <p className="booking-empty">No hay profesionales activos para este servicio.</p>
-            ) : (
-              <select
-                id="b-pro"
-                value={professionalId}
-                onChange={(e) => setProfessionalId(e.target.value ? Number(e.target.value) : "")}
-                required
+          {/* Paso 1: deporte */}
+          <div className="sport-grid">
+            {services.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`sport-card${serviceId === s.id ? " sport-card--active" : ""}`}
+                onClick={() => {
+                  setServiceId(s.id);
+                  setSelectedProId("");
+                  setSlotIso("");
+                }}
               >
-                <option value="">Elegí un profesional...</option>
-                {filteredPros.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} — {p.speciality}
-                  </option>
-                ))}
-              </select>
-            )}
-          </>
-        )}
+                <span className="sport-card-icon">{sportIcon(s.name)}</span>
+                <span className="sport-card-name">{s.name}</span>
+              </button>
+            ))}
+          </div>
 
-        {/* ----- Paso 3: fecha (solo si hay profesional) ----- */}
-        {professionalId && (
-          <>
-            <label htmlFor="b-date"><span className="step-badge">3</span> Fecha</label>
-            <input
-              id="b-date"
-              type="date"
-              value={date}
-              min={toLocalDate(new Date())}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </>
-        )}
-
-        {/* ----- Paso 4: grilla de slots ----- */}
-        {professionalId && date && selectedService && (
-          <>
-            <label><span className="step-badge">4</span> Horario</label>
-            {loadingSlots ? (
-              <p>Cargando disponibilidad...</p>
-            ) : slots.length === 0 ? (
-              <p className="booking-empty">No hay horarios disponibles para este día.</p>
-            ) : (
-              <div className="slot-grid">
-                {slots.map((s) => (
+          {/* Paso 2: tira de días */}
+          {serviceId && (
+            <div className="week-strip">
+              <div className="week-strip-head">
+                <strong>
+                  {MONTHS[weekStart.getMonth()].charAt(0).toUpperCase() + MONTHS[weekStart.getMonth()].slice(1)} {weekStart.getFullYear()}
+                </strong>
+                <div className="week-strip-nav">
                   <button
-                    key={s.iso}
                     type="button"
-                    className={`slot slot-${s.state}${s.iso === slotIso ? " slot-selected" : ""}`}
-                    disabled={s.state !== "free"}
-                    onClick={() => setSlotIso(s.iso)}
-                    title={
-                      s.state === "busy" ? "Ocupado" :
-                      s.state === "past" ? "Ya pasó" :
-                      `${formatTime(s.start)} - ${formatTime(s.end)}`
-                    }
+                    aria-label="Semana anterior"
+                    disabled={!canGoPrevWeek}
+                    onClick={() => setWeekStart((w) => addDays(w, -7))}
                   >
-                    {formatTime(s.start)}
+                    ‹
                   </button>
-                ))}
-              </div>
-            )}
-            <p className="slot-legend">
-              <span className="slot slot-free legend-chip"></span> Disponible
-              <span className="slot slot-busy legend-chip"></span> Ocupado
-              <span className="slot slot-past legend-chip"></span> Ya pasó
-            </p>
-          </>
-        )}
-
-        {/* ----- Paso 5: notas + submit (solo con slot elegido) ----- */}
-        {slotIso && (
-          <>
-            {(() => {
-              const slot = slots.find((s) => s.iso === slotIso);
-              const pro = filteredPros.find((p) => p.id === professionalId);
-              if (!slot || !pro || !selectedService) return null;
-              return (
-                <div className="booking-summary">
-                  <div><strong>Servicio:</strong> {selectedService.name} ({selectedService.durationMinutes} min)</div>
-                  <div><strong>Profesional:</strong> {pro.name}</div>
-                  <div><strong>Cuándo:</strong> {date} · {formatTime(slot.start)} – {formatTime(slot.end)}</div>
-                  <div><strong>Precio:</strong> ${Number(selectedService.price).toFixed(2)}</div>
+                  <button
+                    type="button"
+                    aria-label="Semana siguiente"
+                    disabled={!canGoNextWeek}
+                    onClick={() => setWeekStart((w) => addDays(w, 7))}
+                  >
+                    ›
+                  </button>
                 </div>
-              );
-            })()}
-            <label htmlFor="b-notes"><span className="step-badge">5</span> Notas (opcional)</label>
-            <textarea
-              id="b-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              maxLength={500}
-              rows={3}
-              placeholder="Comentario para el profesional..."
-            />
+              </div>
+              <div className="week-days">
+                {weekDays.map((day) => {
+                  const selectable = isSelectableDay(day);
+                  const isSelected = toLocalDate(day) === date;
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      type="button"
+                      className={`week-day${isSelected ? " week-day--active" : ""}`}
+                      disabled={!selectable}
+                      onClick={() => pickDay(day)}
+                    >
+                      <span className="week-day-name">{WEEKDAYS_MON[(day.getDay() + 6) % 7]}</span>
+                      <span className="week-day-num">{day.getDate()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-            <button type="submit" className="btn btn-primary booking-submit" disabled={submitting}>
-              {submitting ? "Reservando..." : "Confirmar reserva"}
+          {/* Paso 3: canchas + horarios */}
+          {serviceId && (
+            <div className="courts">
+              {courts.length === 0 ? (
+                <p className="booking2-empty">No hay coaches disponibles para este deporte.</p>
+              ) : loadingSlots ? (
+                <p className="booking2-empty">Cargando disponibilidad…</p>
+              ) : (
+                courts.map((court) => {
+                  const slots = buildSlots(
+                    new Date(`${date}T00:00:00`),
+                    selectedService!.durationMinutes,
+                    busyByPro[court.id] ?? []
+                  );
+                  return (
+                    <article key={court.id} className="court-card">
+                      <div className="court-card-head">
+                        <h3 className="court-card-name">{court.name}</h3>
+                        <span className="court-card-tag">{court.speciality}</span>
+                      </div>
+                      <div className="slot-chips">
+                        {slots.map((s) => (
+                          <button
+                            key={s.iso}
+                            type="button"
+                            className={`slot-chip slot-chip--${s.state}${
+                              selectedProId === court.id && slotIso === s.iso ? " slot-chip--selected" : ""
+                            }`}
+                            disabled={s.state !== "free"}
+                            title={
+                              s.state === "busy" ? "Ocupado" :
+                              s.state === "past" ? "Ya pasó" :
+                              s.state === "unavailable" ? "No entra un turno de esta duración" :
+                              `${formatTime(s.start)} - ${formatTime(s.end)}`
+                            }
+                            onClick={() => {
+                              setSelectedProId(court.id);
+                              setSlotIso(s.iso);
+                            }}
+                          >
+                            {formatTime(s.start)}
+                          </button>
+                        ))}
+                      </div>
+                    </article>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ---------- Panel lateral: Resumen ---------- */}
+        <aside className="summary">
+          <form className="summary-card" onSubmit={handleSubmit}>
+            <h2 className="summary-title">Resumen de reserva</h2>
+
+            <div className="summary-row">
+              <span className="summary-label">Deporte</span>
+              <span className="summary-value">
+                {selectedService ? selectedService.name : "—"}
+                {selectedService && <CheckDot ok />}
+              </span>
+            </div>
+
+            <div className="summary-row">
+              <span className="summary-label">Coach</span>
+              <span className="summary-value">{selectedCourt ? selectedCourt.name : "—"}</span>
+            </div>
+
+            <div className="summary-row">
+              <span className="summary-label">Día y hora</span>
+              <span className="summary-value">{summaryWhen ?? "—"}</span>
+            </div>
+
+            {selectedService && (
+              <p className="summary-session">{selectedService.durationMinutes} min de sesión</p>
+            )}
+
+            <div className="summary-price">
+              <div className="summary-price-row">
+                <span>Precio</span>
+                <span>{selectedService ? `$${Number(selectedService.price).toFixed(2)}` : "$0.00"}</span>
+              </div>
+              <div className="summary-price-row summary-price-total">
+                <span>Total</span>
+                <span>{selectedService ? `$${Number(selectedService.price).toFixed(2)}` : "$0.00"}</span>
+              </div>
+            </div>
+
+            {/* Notas opcionales para el profesional. */}
+            {selectedSlot && (
+              <textarea
+                className="summary-notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={500}
+                rows={2}
+                placeholder="Notas (opcional)…"
+              />
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary summary-confirm"
+              disabled={submitting || !selectedSlot}
+            >
+              {submitting ? "Reservando…" : "Confirmar reserva →"}
             </button>
-          </>
-        )}
 
-        {error && <p className="booking-error">{error}</p>}
-        {successMsg && <p className="booking-success">{successMsg}</p>}
-      </form>
+            <p className="summary-fineprint">
+              Cancelaciones permitidas hasta 24 hs antes del turno.
+            </p>
+
+            {error && <p className="booking2-error">{error}</p>}
+            {successMsg && <p className="booking2-success">{successMsg}</p>}
+          </form>
+        </aside>
+      </div>
     </section>
+  );
+}
+
+// Indicador circular verde de "paso completo" en el resumen.
+function CheckDot({ ok }: { ok: boolean }) {
+  if (!ok) return null;
+  return (
+    <svg className="summary-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
   );
 }
 
