@@ -107,8 +107,12 @@ async function authFetch(path: string, init: RequestInit = {}): Promise<Response
 // GET /users → listado paginado.
 // page (índice base 0) y size (cuántos por página) son los params
 // estándar de Spring Data. sort=id,asc da un orden estable.
-export async function getUsers(page = 0, size = 20): Promise<PageResponse<AdminUser>> {
-  const response = await authFetch(`/users?page=${page}&size=${size}&sort=id,asc`);
+// `query` es opcional: el back lo matchea (case-insensitive) sobre
+// username o email, con paginación real (búsqueda global, no por página).
+export async function getUsers(page = 0, size = 20, query?: string): Promise<PageResponse<AdminUser>> {
+  const params = new URLSearchParams({ page: String(page), size: String(size), sort: "id,asc" });
+  if (query && query.trim()) params.set("query", query.trim());
+  const response = await authFetch(`/users?${params.toString()}`);
   return response.json();
 }
 
@@ -193,8 +197,12 @@ export interface ProfessionalPayload {
   serviceTypeIds: number[];
 }
 
-export async function getProfessionals(page = 0, size = 20): Promise<PageResponse<Professional>> {
-  const response = await authFetch(`/professionals?page=${page}&size=${size}&sort=id,asc`);
+// `query` (opcional) lo matchea el back, case-insensitive, sobre nombre
+// o especialidad, con paginación real (búsqueda global, server-side).
+export async function getProfessionals(page = 0, size = 20, query?: string): Promise<PageResponse<Professional>> {
+  const params = new URLSearchParams({ page: String(page), size: String(size), sort: "id,asc" });
+  if (query && query.trim()) params.set("query", query.trim());
+  const response = await authFetch(`/professionals?${params.toString()}`);
   return response.json();
 }
 
@@ -248,6 +256,9 @@ export interface AppointmentFilters {
   professionalId?: number;
   from?: string; // ISO datetime
   to?: string;   // ISO datetime
+  // Búsqueda libre (case-insensitive) sobre socio, notas, nombre del
+  // profesional o nombre del tipo de servicio.
+  query?: string;
 }
 
 // Listado paginado de turnos con filtros opcionales.
@@ -269,6 +280,7 @@ export async function getAppointments(
   if (filters.professionalId) params.set("professionalId", String(filters.professionalId));
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
+  if (filters.query && filters.query.trim()) params.set("query", filters.query.trim());
 
   const response = await authFetch(`/appointments?${params.toString()}`);
   return response.json();

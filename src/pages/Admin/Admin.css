@@ -768,6 +768,479 @@
     color: var(--primary);
 }
 
+/* ----- 9c. Turnos (bookings management) ------------------------------ */
+
+.bk-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.bk-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.bk-stat {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 110px;
+}
+
+.bk-stat--accent {
+    background: #f5fbe8;
+    border-color: var(--secondary);
+}
+
+.bk-stat-label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.bk-stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.2;
+}
+
+/* Barra de filtros. */
+.bk-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(26, 54, 93, 0.04);
+}
+
+.bk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 160px;
+}
+
+.bk-field label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.bk-field select,
+.bk-field input {
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    background: #fff;
+    font: inherit;
+    color: #1a202c;
+}
+
+.bk-history {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.9rem;
+    color: #334155;
+    font-weight: 500;
+    padding-bottom: 9px;
+}
+
+.bk-history input {
+    width: auto;
+}
+
+/* Tabla. */
+.bk-table-wrap {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(26, 54, 93, 0.05);
+}
+
+.bk-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bk-table th,
+.bk-table td {
+    text-align: left;
+    padding: 13px 16px;
+    font-size: 0.92rem;
+    vertical-align: middle;
+}
+
+.bk-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bk-table tbody tr {
+    border-bottom: 1px solid #edf2f7;
+}
+
+.bk-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.bk-row--cancelled td:not(.bk-actions) {
+    opacity: 0.55;
+}
+
+.bk-member {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.bk-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e7eefc;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+.bk-member-info,
+.bk-when {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.bk-member-info strong,
+.bk-when strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.bk-member-info small,
+.bk-when small {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Acciones. */
+.bk-actions-col {
+    text-align: right;
+}
+
+.bk-actions {
+    display: flex;
+    gap: 7px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.bk-btn {
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.bk-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.bk-btn--confirm {
+    background: var(--secondary);
+    color: var(--primary);
+}
+
+.bk-btn--confirm:hover:not(:disabled) {
+    filter: brightness(0.95);
+}
+
+.bk-btn--ghost {
+    background: #fff;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+.bk-btn--ghost:hover:not(:disabled) {
+    background: #f1f5f9;
+}
+
+.bk-btn--danger {
+    background: #fff;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+.bk-btn--danger:hover:not(:disabled) {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+/* Paginación numerada. */
+.bk-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.bk-pager-info {
+    color: #64748b;
+    font-size: 0.88rem;
+}
+
+.bk-pager-nav {
+    display: flex;
+    gap: 5px;
+}
+
+.bk-page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary);
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.bk-page-btn:hover:not(:disabled):not(.bk-page-btn--active) {
+    background: #f1f5f9;
+}
+
+.bk-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.bk-page-btn--active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+/* ----- 9d. Usuarios -------------------------------------------------- */
+
+/* El campo de búsqueda ocupa más ancho que un filtro normal. */
+.usr-search {
+    flex: 1;
+    min-width: 240px;
+}
+
+/* Badge de rol. */
+.usr-role {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.usr-role--admin {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.usr-role--user {
+    background: #eef2f7;
+    color: #475569;
+}
+
+/* Select para cambiar el rol, en la columna de acciones. */
+.usr-role-select {
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e0;
+    background: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    color: #1a202c;
+    cursor: pointer;
+}
+
+/* ----- 9e. Profesionales (cards) ------------------------------------- */
+
+.pro-head-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pro-add-btn {
+    white-space: nowrap;
+}
+
+.pro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.pro-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(26, 54, 93, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.pro-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.pro-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.pro-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.pro-status--on {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.pro-status--off {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.pro-name {
+    margin: 0 0 2px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pro-speciality {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.pro-services-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.pro-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+    /* empuja las acciones al fondo aunque las cards tengan distinto alto */
+    min-height: 28px;
+}
+
+.pro-chip {
+    background: #eef2f7;
+    color: #334155;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 999px;
+}
+
+.pro-chip--empty {
+    background: transparent;
+    color: #94a3b8;
+    font-style: italic;
+    padding-left: 0;
+}
+
+.pro-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.pro-edit-btn {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: filter 0.15s;
+}
+
+.pro-edit-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+}
+
+.pro-edit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 /* ----- 10. Responsive ------------------------------------------------ */
 
 /* En mobile colapsamos la sidebar arriba del contenido (1 columna),
@@ -795,6 +1268,61 @@
     }
     .dash-cols {
         grid-template-columns: 1fr;
+    }
+
+    /* Turnos: cabecera y filtros se apilan; los campos ocupan el ancho. */
+    .bk-head {
+        flex-direction: column;
+    }
+    .bk-stats {
+        width: 100%;
+    }
+    .bk-stat {
+        flex: 1;
+    }
+    .bk-field {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    /* Tabla de turnos → cards apiladas (cada celda con su etiqueta). */
+    .bk-table thead {
+        display: none;
+    }
+    .bk-table,
+    .bk-table tbody,
+    .bk-table tr,
+    .bk-table td {
+        display: block;
+        width: 100%;
+    }
+    .bk-table tr {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        padding: 6px 4px;
+    }
+    .bk-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 14px;
+    }
+    .bk-table td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+    .bk-actions {
+        justify-content: flex-start;
+    }
+    .bk-actions::before {
+        align-self: center;
     }
 
     .admin-content {
