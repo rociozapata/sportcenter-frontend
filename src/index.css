@@ -39,6 +39,20 @@ body {
   margin: 0;
 }
 
+/* Sticky footer: #root es columna flex de al menos toda la altura del
+   viewport y <main> crece para ocupar el espacio sobrante, empujando el
+   footer al fondo aunque la página tenga poco contenido (o no cargue). */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
 /* Todos los títulos usan Montserrat. Inter queda como default del body
    por la regla `font:` del :root. */
 h1, h2, h3, h4, h5, h6 {

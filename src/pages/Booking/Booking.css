@@ -1,309 +1,456 @@
 /* ============================================================
-   Booking (/turnos) — estilos del flujo de reserva.
+   Booking (/turnos) — layout "dashboard": columna principal
+   (deporte + días + canchas) + panel lateral de Resumen.
    ============================================================ */
 
-.booking-section {
-    max-width: 760px;
-    margin: 48px auto;
+.booking2 {
+    max-width: 1100px;
+    margin: 40px auto;
     padding: 0 20px;
     color: #1a202c;
 }
 
-.booking-section > h1 {
+.booking2-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
+    align-items: start;
+}
+
+.booking2-head {
+    margin-bottom: 22px;
+}
+
+.booking2-title {
     color: var(--primary);
-    margin-bottom: 4px;
-    font-size: 2rem;
+    font-size: 1.9rem;
+    font-weight: 800;
+    margin: 0 0 4px;
     letter-spacing: -0.01em;
 }
 
-.booking-subtitle {
-    color: #4a5568;
-    margin: 0 0 28px;
-    font-size: 0.98rem;
+.booking2-subtitle {
+    color: #64748b;
+    margin: 0;
 }
 
-/* Tarjeta contenedora del formulario. */
-.booking-form {
+.booking2-empty {
+    color: #64748b;
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0;
+}
+
+/* ----- Paso 1: deportes ---------------------------------------------- */
+
+.sport-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.sport-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 10px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--primary);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.sport-card:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.sport-card--active {
+    border-color: var(--secondary);
+    background: #f5fbe8;
+    box-shadow: 0 0 0 3px rgba(124, 179, 5, 0.15);
+}
+
+.sport-card-icon {
+    display: flex;
+    color: var(--primary);
+}
+
+.sport-card--active .sport-card-icon {
+    color: #5a7a00;
+}
+
+.sport-card-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+/* ----- Paso 2: tira de días ------------------------------------------ */
+
+.week-strip {
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
-    padding: 28px 28px 32px;
-    box-shadow: 0 4px 18px rgba(26, 54, 93, 0.06);
+    padding: 16px 18px;
+    margin-bottom: 22px;
 }
 
-/* Cada label arranca con un badge numerado. */
-.booking-form label {
+.week-strip-head {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-weight: 600;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.week-strip-head strong {
     color: var(--primary);
-    margin-top: 18px;
-    font-size: 1rem;
+    font-size: 1.05rem;
 }
 
-.booking-form label:first-of-type {
-    margin-top: 0;
+.week-strip-nav {
+    display: flex;
+    gap: 6px;
 }
 
-.step-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: #fff;
-    font-size: 0.85rem;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.booking-form select,
-.booking-form input[type="date"],
-.booking-form textarea {
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e0;
-    font: inherit;
+.week-strip-nav button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e2e8f0;
     background: #fff;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-/* Select con flecha propia (chevron) en vez de la nativa, para que se
-   vea igual en todos los browsers. appearance:none saca la flecha del
-   sistema; el chevron va como background SVG a la derecha.
-   box-sizing:border-box evita que el padding lo desborde en mobile. */
-.booking-form select {
-    appearance: none;
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: 100%;
-    padding-right: 40px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    cursor: pointer;
-}
-
-.booking-form select:focus,
-.booking-form input[type="date"]:focus,
-.booking-form textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.12);
-}
-
-.booking-form textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-/* Línea informativa debajo de un campo (ej. duración + precio del
-   servicio elegido). Va en chips para que se lea de un vistazo. */
-.field-hint {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 8px 0 0;
-}
-
-.field-hint span {
-    background: #edf4fb;
-    border: 1px solid #cdd9e8;
-    color: var(--primary);
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 999px;
-}
-
-.booking-empty {
-    color: #4a5568;
-    font-style: italic;
-    background: #f7fafc;
-    border: 1px dashed #cbd5e0;
-    padding: 10px 14px;
     border-radius: 8px;
-    margin: 6px 0 0;
-}
-
-/* ----- Grilla de slots ----------------------------------------------- */
-
-.slot-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-    gap: 10px;
-    margin-top: 8px;
-}
-
-/* Slot base. */
-.slot {
-    padding: 11px 6px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    font: inherit;
-    font-weight: 600;
-    font-size: 0.92rem;
     cursor: pointer;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--primary);
 }
 
-.slot-free {
-    background: #ebfaf0;
-    color: #22543d;
-    border-color: #9ae6b4;
+.week-strip-nav button:hover:not(:disabled) {
+    background: #f1f5f9;
 }
 
-.slot-free:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(34, 84, 61, 0.15);
-    background: #d9f5e3;
+.week-strip-nav button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
-.slot-busy {
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.week-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px;
+    background: #f8fafc;
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.week-day:hover:not(:disabled):not(.week-day--active) {
+    border-color: #cbd5e1;
+}
+
+.week-day:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.week-day--active {
+    background: #f5fbe8;
+    border-color: var(--secondary);
+}
+
+.week-day-name {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+}
+
+.week-day-num {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ----- Paso 3: canchas + chips de horario ---------------------------- */
+
+.courts {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.court-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 10px rgba(26, 54, 93, 0.04);
+}
+
+.court-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.court-card-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.court-card-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.slot-chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+    gap: 8px;
+}
+
+.slot-chip {
+    padding: 9px 6px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.12s;
+}
+
+.slot-chip--free:hover {
+    border-color: var(--secondary);
+    background: #f5fbe8;
+    transform: translateY(-1px);
+}
+
+.slot-chip--busy {
     background: #fff1f1;
-    color: #9b2c2c;
-    border-color: #feb2b2;
-    cursor: not-allowed;
+    color: #b91c1c;
+    border-color: #fecaca;
     text-decoration: line-through;
-    opacity: 0.85;
-}
-
-.slot-past {
-    background: #edf2f7;
-    color: #a0aec0;
-    border-color: #e2e8f0;
     cursor: not-allowed;
 }
 
-/* Celda libre pero donde no entra un turno de la duración elegida
-   (pisaría un turno posterior o el cierre). Gris con rayado sutil para
-   diferenciarla del "ocupado" (rojo) y del "ya pasó". */
-.slot-unavailable {
-    background: repeating-linear-gradient(
-        135deg,
-        #f1f5f9,
-        #f1f5f9 6px,
-        #e6ebf1 6px,
-        #e6ebf1 12px
-    );
+.slot-chip--past {
+    background: #f1f5f9;
     color: #94a3b8;
     border-color: #e2e8f0;
     cursor: not-allowed;
 }
 
-/* Slot elegido: relleno primario. */
-.slot-selected,
-.slot-selected:hover {
-    background: var(--primary) !important;
-    color: #fff !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 4px 12px rgba(26, 54, 93, 0.28);
-    transform: translateY(-1px);
+.slot-chip--unavailable {
+    background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 6px, #eef2f7 6px, #eef2f7 12px);
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
 }
 
-/* Leyenda debajo de la grilla. */
-.slot-legend {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 4px;
-    margin-top: 16px;
-    color: #4a5568;
-    font-size: 0.85rem;
-}
-
-.legend-chip {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    padding: 0;
-    border-radius: 50%;
-    cursor: default;
-    margin-left: 14px;
-}
-
-.legend-chip:first-of-type {
-    margin-left: 4px;
-}
-
-/* ----- Resumen previo a confirmar ------------------------------------ */
-
-.booking-summary {
-    margin-top: 20px;
-    padding: 14px 16px;
-    background: linear-gradient(135deg, #f7fafc 0%, #edf4fb 100%);
-    border: 1px solid #cdd9e8;
-    border-radius: 10px;
-    font-size: 0.92rem;
-    color: #2d3748;
-    display: grid;
-    gap: 4px;
-}
-
-.booking-summary strong {
+.slot-chip--selected,
+.slot-chip--selected:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
     color: var(--primary);
+    box-shadow: 0 3px 10px rgba(124, 179, 5, 0.3);
 }
 
-/* ----- Submit y feedback --------------------------------------------- */
+/* ----- Panel lateral: Resumen ---------------------------------------- */
 
-.booking-submit {
-    margin-top: 18px;
-    align-self: flex-start;
-    padding: 12px 26px;
+.summary {
+    position: sticky;
+    top: 24px;
+}
+
+.summary-card {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    box-shadow: 0 12px 30px rgba(10, 25, 41, 0.2);
+}
+
+.summary-title {
+    margin: 0 0 18px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.summary-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.summary-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #93a4b8;
+}
+
+.summary-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.summary-check {
+    color: var(--secondary);
+    margin-left: auto;
+}
+
+.summary-session {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    color: var(--secondary);
+}
+
+.summary-price {
+    margin-top: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.summary-price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.92rem;
+    color: #c9d4e0;
+    padding: 4px 0;
+}
+
+.summary-price-total {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.summary-price-total span:last-child {
+    color: var(--secondary);
+}
+
+.summary-notes {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font: inherit;
+    resize: vertical;
+}
+
+.summary-notes::placeholder {
+    color: #93a4b8;
+}
+
+.summary-confirm {
+    width: 100%;
+    margin-top: 16px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    justify-content: center;
     font-size: 1rem;
 }
 
-.booking-error {
-    color: #9b2c2c;
-    background: #fff5f5;
-    border: 1px solid #feb2b2;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-top: 14px;
+.summary-fineprint {
+    margin: 10px 0 0;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #93a4b8;
 }
 
-.booking-success {
-    color: #22543d;
-    background: #ebfaf0;
-    border: 1px solid #9ae6b4;
-    padding: 10px 14px;
+.booking2-error {
+    margin: 12px 0 0;
+    background: rgba(220, 38, 38, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fecaca;
+    padding: 9px 12px;
     border-radius: 8px;
-    margin-top: 14px;
+    font-size: 0.88rem;
 }
 
-/* ----- Responsive ----------------------------------------------------- */
+.booking2-success {
+    margin: 12px 0 0;
+    background: rgba(124, 179, 5, 0.18);
+    border: 1px solid rgba(124, 179, 5, 0.5);
+    color: #e8f6c8;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+}
 
-@media (max-width: 540px) {
-    .booking-form {
-        padding: 20px 18px 24px;
+/* ----- Responsive ---------------------------------------------------- */
+
+@media (max-width: 880px) {
+    .booking2-grid {
+        grid-template-columns: 1fr;
     }
 
-    /* Controles más altos y con font-size 16px: mejor área de toque y,
-       sobre todo, evita el zoom automático de iOS al enfocar el campo
-       (se dispara cuando la fuente es < 16px). */
-    .booking-form select,
-    .booking-form input[type="date"],
-    .booking-form textarea {
-        min-height: 48px;
-        font-size: 16px;
+    /* En mobile el resumen deja de ser sticky y va al final del flujo. */
+    .summary {
+        position: static;
+        order: 2;
+    }
+}
+
+@media (max-width: 520px) {
+    .sport-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .booking-form textarea {
-        min-height: 96px;
+    .week-days {
+        gap: 6px;
     }
 
-    .slot-grid {
-        grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-        gap: 8px;
+    .week-day {
+        padding: 8px 2px;
     }
 
-    .booking-section > h1 {
-        font-size: 1.6rem;
+    .week-day-num {
+        font-size: 1rem;
+    }
+
+    .slot-chips {
+        grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
     }
 }
