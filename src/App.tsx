@@ -1,5 +1,5 @@
 // Routes/Route definen qué componente se muestra según la URL.
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -24,6 +24,11 @@ import Appointments from './pages/Admin/Appointments'
 // según la ruta. Navbar y Footer quedan FUERA de <Routes>, así se ven
 // siempre sin importar en qué página estemos.
 function App() {
+  // Ocultamos el Footer dentro del panel admin (rutas que empiezan con /admin),
+  // ya que ese panel tiene su propio chasis (sidebar) y no necesita el footer público.
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
+
   return (
     <>
       <Navbar />
@@ -63,7 +68,7 @@ function App() {
           </Route>
         </Routes>
       </main>
-      <Footer />
+      {isAdmin ? null : <Footer />}
     </>
   )
 }

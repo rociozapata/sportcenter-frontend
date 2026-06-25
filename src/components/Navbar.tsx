@@ -29,9 +29,25 @@ function Navbar() {
   // como "disparador" para refrescar datos cuando el usuario navega.
   const location = useLocation();
 
-  // Variable booleana: ¿hay token guardado? Se recalcula en cada render.
-  // Así, apenas el usuario se loguea (y volvemos a renderizar), authed pasa a true.
-  const authed = isAuthenticated();
+  // ¿Hay sesión activa? Lo guardamos en estado (no como variable suelta) para
+  // poder refrescarlo cuando login/logout disparen el evento "auth-changed".
+  // Escribir en localStorage no re-renderiza React por sí solo; por eso
+  // escuchamos el evento y volvemos a chequear el token.
+  const [authed, setAuthed] = useState(isAuthenticated());
+
+  // EFECTO 0: mantener `authed` sincronizado con la sesión real.
+  useEffect(() => {
+    const sync = () => setAuthed(isAuthenticated());
+    // login()/logout() disparan este evento al cambiar el token.
+    window.addEventListener("auth-changed", sync);
+    // "storage" sincroniza entre pestañas: si cerrás sesión en una, las
+    // demás se enteran y actualizan el navbar.
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("auth-changed", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   // Helpers cortos para cerrar cada menú. Los definimos una vez para no
   // repetir setIsOpen(false) por todos lados.

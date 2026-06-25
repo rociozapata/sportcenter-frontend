@@ -66,6 +66,10 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
   // Guardamos el token en localStorage para que sobreviva a recargas.
   localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
 
+  // Avisamos a la app que cambió la sesión. El Navbar (y quien quiera)
+  // escucha este evento para refrescar su estado sin esperar una recarga.
+  window.dispatchEvent(new Event("auth-changed"));
+
   // Devolvemos los datos por si el componente los quiere usar.
   return data;
 }
@@ -164,6 +168,8 @@ export function getToken(): string | null {
 // Helper: borra el token. Es básicamente el "cerrar sesión".
 export function logout(): void {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
+  // Mismo aviso que en login: la sesión cambió (ahora a "sin sesión").
+  window.dispatchEvent(new Event("auth-changed"));
 }
 
 // Helper: true si hay token guardado Y todavía no venció.
