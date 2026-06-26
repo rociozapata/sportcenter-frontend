@@ -21,7 +21,7 @@
 //   - "free"        disponible.
 // ============================================================
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 
 import {
   createAppointment,
@@ -178,6 +178,24 @@ function sportIcon(name: string) {
     <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" /></svg>
   );
 }
+
+// ----- Distinción visual entre coaches ---------------------------------
+
+// Iniciales para el avatar del coach: primeras letras de las dos
+// primeras palabras del nombre ("Juan Pérez" → "JP", "Ana" → "A").
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join("");
+}
+
+// Paleta de acentos para diferenciar cada coach de un vistazo. Se asigna
+// por posición en la lista, así dos coaches contiguos nunca comparten
+// color y se nota a simple vista que hay más de uno.
+const COACH_ACCENTS = ["#2563eb", "#7cb305", "#d97706", "#db2777", "#0891b2", "#7c3aed"];
 
 // ----- Componente ------------------------------------------------------
 
@@ -435,17 +453,40 @@ function Booking() {
               ) : loadingSlots ? (
                 <p className="booking2-empty">Cargando disponibilidad…</p>
               ) : (
-                courts.map((court) => {
+                <>
+                {/* Encabezado: deja en claro cuántos coaches hay para este deporte. */}
+                <div className="courts-head">
+                  <h2 className="courts-head-title">
+                    {courts.length === 1 ? "Coach disponible" : "Elegí tu coach"}
+                  </h2>
+                  <span className="courts-count">
+                    {courts.length} {courts.length === 1 ? "coach" : "coaches"}
+                  </span>
+                </div>
+                {courts.map((court, idx) => {
                   const slots = buildSlots(
                     new Date(`${date}T00:00:00`),
                     selectedService!.durationMinutes,
                     busyByPro[court.id] ?? []
                   );
+                  // Acento por posición: avatar, borde e índice comparten color
+                  // para que cada coach se distinga del de al lado.
+                  const accent = COACH_ACCENTS[idx % COACH_ACCENTS.length];
                   return (
-                    <article key={court.id} className="court-card">
+                    <article
+                      key={court.id}
+                      className="court-card"
+                      style={{ "--coach-accent": accent } as CSSProperties}
+                    >
                       <div className="court-card-head">
-                        <h3 className="court-card-name">{court.name}</h3>
-                        <span className="court-card-tag">{court.speciality}</span>
+                        <span className="court-avatar" aria-hidden="true">{initials(court.name)}</span>
+                        <div className="court-card-id">
+                          <h3 className="court-card-name">{court.name}</h3>
+                          <span className="court-card-tag">{court.speciality}</span>
+                        </div>
+                        {courts.length > 1 && (
+                          <span className="court-card-index">{idx + 1}</span>
+                        )}
                       </div>
                       <div className="slot-chips">
                         {slots.map((s) => (
@@ -473,7 +514,8 @@ function Booking() {
                       </div>
                     </article>
                   );
-                })
+                })}
+                </>
               )}
             </div>
           )}

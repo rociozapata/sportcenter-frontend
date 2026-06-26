@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Services.css"
+import { listProfessionals, listServiceTypes } from "../../services/booking";
+import type { Professional } from "../../services/admin";
 // Importamos cada imagen: Vite las procesa y nos devuelve la URL final.
 // Hacerlo por import (en vez de strings sueltos) asegura que la imagen
 // entre en la build y rompe en compilación si el archivo no existe.
@@ -63,8 +66,20 @@ const service = [
     }
 ];
 
-// Mismo enfoque para el staff: un array que después mapeamos a cards.
-const staff = [
+// Forma normalizada de una card de staff. La usamos tanto para el
+// fallback estático como para los profesionales que llegan de la API.
+// img puede ser null: en ese caso la card muestra un placeholder.
+interface StaffCard {
+    key: string;
+    name: string;
+    role: string;       // disciplina (píldora superpuesta)
+    specialty: string;  // bajada / experiencia
+    img: string | null;
+}
+
+// Fallback estático: se muestra si la API no devuelve profesionales
+// (o falla), para que la sección nunca quede vacía.
+const staffFallback: StaffCard[] = [
     { key: "tenis", name: "Natalia", role: "Tenis", specialty: "Ex selección nacional · 8 años", img: staffTenisImg },
     { key: "padel", name: "Gonzalo", role: "Padel", specialty: "Categoría 3 AJPP · 12 años", img: staffPadelImg },
     { key: "futbol", name: "Andrés", role: "Futbol", specialty: "Ex profesional · DT certificado", img: staffFutbolImg },
@@ -72,10 +87,74 @@ const staff = [
     { key: "crossfit", name: "Facundo", role: "Crossfit", specialty: "CrossFit Level 2 Trainer", img: staffCrossfitImg },
 ];
 
-// Página pública /servicios. Es informativa (no pega a la API):
-// muestra las disciplinas, una frase de marca, el staff y un CTA final.
-// Todos los datos salen de los arrays de arriba.
+// ----- Híbrido: datos de la API + imágenes locales ---------------------
+// Las fotos siguen viviendo en el frontend. Para cada profesional que
+// llega de la API, elegimos la imagen matcheando su disciplina contra
+// estas palabras clave. Si no matchea ninguna, la card usa un placeholder.
+const STAFF_IMAGES: { keywords: string[]; img: string }[] = [
+    { keywords: ["tenis", "tennis"], img: staffTenisImg },
+    { keywords: ["padel", "pádel"], img: staffPadelImg },
+    { keywords: ["futbol", "fútbol", "soccer"], img: staffFutbolImg },
+    { keywords: ["crossfit"], img: staffCrossfitImg },
+    { keywords: ["funcional"], img: staffFuncionalImg },
+];
+
+function resolveStaffImage(p: Professional): string | null {
+    const haystack = [p.speciality, ...p.services.map((s) => s.name)].join(" ").toLowerCase();
+    for (const { keywords, img } of STAFF_IMAGES) {
+        if (keywords.some((k) => haystack.includes(k))) return img;
+    }
+    return null;
+}
+
+// Disciplina para la píldora: el primer servicio que ofrece o, si no
+// tiene servicios cargados, su especialidad.
+function disciplineOf(p: Professional): string {
+    return p.services[0]?.name ?? p.speciality;
+}
+
+// Iniciales para el placeholder cuando no hay foto ("Juan Pérez" → "JP").
+function initialsOf(name: string): string {
+    return name.trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join("") || "?";
+}
+
+// Página pública /servicios. Las disciplinas, la frase de marca y el CTA
+// son informativos (datos locales). El staff SÍ sale de la API: trae los
+// profesionales activos y resuelve la foto en el front (modelo híbrido).
 function Services() {
+    // Arrancan con el fallback para que las secciones/stats nunca queden
+    // vacías; se reemplazan por los datos de la API cuando llegan.
+    const [staffCards, setStaffCards] = useState<StaffCard[]>(staffFallback);
+    const [serviceCount, setServiceCount] = useState<number>(service.length);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        listProfessionals()
+            .then((pros) => {
+                if (cancelled) return;
+                const active = pros.filter((p) => p.active);
+                if (active.length === 0) return; // sin profesionales: dejamos el fallback
+                setStaffCards(
+                    active.map((p) => ({
+                        key: String(p.id),
+                        name: p.name,
+                        role: disciplineOf(p),
+                        specialty: p.speciality,
+                        img: resolveStaffImage(p),
+                    }))
+                );
+            })
+            .catch(() => { /* si la API falla, queda el staff de fallback */ });
+
+        // Conteo real de disciplinas (tipos de servicio) para el hero.
+        listServiceTypes()
+            .then((svc) => { if (!cancelled && svc.length > 0) setServiceCount(svc.length); })
+            .catch(() => { /* dejamos el conteo del fallback local */ });
+
+        return () => { cancelled = true; };
+    }, []);
+
     return (
         <>
             {/* HERO: encabezado con título grande, bajada y badges decorativos. */}
@@ -90,9 +169,10 @@ function Services() {
                         Elegí tu favorita y reservá tu primer turno en minutos.
                     </p>
                     <div className="services-hero-stats">
-                        <div><strong>5</strong><span>Disciplinas</span></div>
-                        <div><strong>+15</strong><span>Profesionales</span></div>
-                        <div><strong>7</strong><span>Días por semana</span></div>
+                        <div><strong>{serviceCount}</strong><span>Disciplinas</span></div>
+                        <div><strong>{staffCards.length}</strong><span>Profesionales</span></div>
+                        {/* Lun-Vie y Sáb; domingo cerrado → 6 días. */}
+                        <div><strong>6</strong><span>Días por semana</span></div>
                     </div>
                 </div>
             </section>
@@ -156,10 +236,14 @@ function Services() {
                     </div>
 
                     <div className="staff-grid">
-                        {staff.map((p) => (
-                            <article key={p.key} className={`staff-card staff-card--${p.key}`}>
-                                <div className="staff-card-img">
-                                    <img src={p.img} alt={p.name} />
+                        {staffCards.slice(0, 4).map((p) => (
+                            <article key={p.key} className="staff-card">
+                                <div className={`staff-card-img${p.img ? "" : " staff-card-img--empty"}`}>
+                                    {p.img ? (
+                                        <img src={p.img} alt={p.name} />
+                                    ) : (
+                                        <span className="staff-card-initials" aria-hidden="true">{initialsOf(p.name)}</span>
+                                    )}
                                     <span className="staff-card-discipline">{p.role}</span>
                                 </div>
 

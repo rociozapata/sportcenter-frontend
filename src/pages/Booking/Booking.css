@@ -193,9 +193,39 @@
     gap: 14px;
 }
 
+/* Encabezado de la lista de coaches: hace explícito cuántos hay. */
+.courts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+
+.courts-head-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.courts-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--primary);
+    background: var(--secondary);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
 .court-card {
     background: #fff;
     border: 1px solid #e2e8f0;
+    /* Franja lateral con el color del coach: el primer indicador visual
+       de que cada tarjeta es un coach distinto. */
+    border-left: 4px solid var(--coach-accent, #e2e8f0);
     border-radius: 14px;
     padding: 16px 18px;
     box-shadow: 0 2px 10px rgba(26, 54, 93, 0.04);
@@ -204,9 +234,31 @@
 .court-card-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     margin-bottom: 12px;
+}
+
+/* Avatar con iniciales, pintado con el acento del coach. */
+.court-avatar {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--coach-accent, var(--primary));
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.court-card-id {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
 }
 
 .court-card-name {
@@ -217,6 +269,7 @@
 }
 
 .court-card-tag {
+    align-self: flex-start;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -225,6 +278,23 @@
     background: #f1f5f9;
     padding: 3px 10px;
     border-radius: 999px;
+}
+
+/* Contador del coach: refuerza que es uno entre varios. */
+.court-card-index {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--coach-accent, #64748b);
+    background: color-mix(in srgb, var(--coach-accent, #64748b) 12%, #fff);
+    border: 1px solid color-mix(in srgb, var(--coach-accent, #64748b) 30%, #fff);
+    border-radius: 50%;
 }
 
 .slot-chips {
