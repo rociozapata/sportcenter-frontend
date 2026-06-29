@@ -185,6 +185,8 @@ export interface Professional {
   name: string;
   speciality: string;
   active: boolean;
+  // URL de la foto del profesional (puede venir null si no se cargó).
+  photoUrl: string | null;
   services: ServiceType[];
 }
 
@@ -194,6 +196,8 @@ export interface ProfessionalPayload {
   name: string;
   speciality: string;
   active: boolean;
+  // URL de la foto. null/omitido = sin foto.
+  photoUrl?: string | null;
   serviceTypeIds: number[];
 }
 

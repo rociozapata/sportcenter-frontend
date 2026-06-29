@@ -386,6 +386,14 @@
     margin: 0 auto;
 }
 
+/* Mensaje de carga / sin profesionales en la sección de staff. */
+.staff-empty {
+    text-align: center;
+    color: #64748b;
+    font-size: 1.05rem;
+    margin: 0;
+}
+
 .staff-card {
     position: relative;
     display: flex;

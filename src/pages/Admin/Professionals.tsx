@@ -22,7 +22,7 @@ import {
 
 const PAGE_SIZE = 10;
 
-// Iniciales para el avatar (no hay fotos en el modelo de datos).
+// Iniciales para el avatar cuando el profesional no tiene foto cargada.
 function initialsOf(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join("") || "?";
 }
@@ -43,6 +43,7 @@ const EMPTY_FORM: ProfessionalPayload = {
   name: "",
   speciality: "",
   active: true,
+  photoUrl: "",       // URL de la foto (opcional)
   serviceTypeIds: [], // array vacío = no atiende nada todavía
 };
 
@@ -126,6 +127,7 @@ function Professionals() {
       name: pro.name,
       speciality: pro.speciality,
       active: pro.active,
+      photoUrl: pro.photoUrl ?? "",
       serviceTypeIds: pro.services.map((s) => s.id),
     });
   }
@@ -153,10 +155,15 @@ function Professionals() {
     e.preventDefault();
     setSaving(true);
     try {
+      // URL vacía → null, así el back guarda "sin foto" en vez de "".
+      const payload: ProfessionalPayload = {
+        ...form,
+        photoUrl: form.photoUrl?.trim() || null,
+      };
       if (editingId && editingId > 0) {
-        await updateProfessional(editingId, form);
+        await updateProfessional(editingId, payload);
       } else {
-        await createProfessional(form);
+        await createProfessional(payload);
       }
       cancelEdit();
       await load(page);
@@ -257,6 +264,20 @@ function Professionals() {
             required
           />
 
+          <label htmlFor="pro-photo">Foto (URL)</label>
+          <input
+            id="pro-photo"
+            type="url"
+            value={form.photoUrl ?? ""}
+            onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
+            placeholder="https://…"
+            maxLength={500}
+          />
+          {/* Vista previa de la foto cargada. */}
+          {form.photoUrl?.trim() && (
+            <img className="pro-form-preview" src={form.photoUrl} alt="Vista previa" />
+          )}
+
           {/* Checkbox de "Activo". El label envuelve al input para que
               hacer click en el texto también lo togglee. */}
           <label className="admin-form-inline">
@@ -316,7 +337,11 @@ function Professionals() {
                 return (
                   <article key={pro.id} className="pro-card">
                     <div className="pro-card-top">
-                      <span className="pro-avatar">{initialsOf(pro.name)}</span>
+                      {pro.photoUrl ? (
+                        <img className="pro-avatar pro-avatar--photo" src={pro.photoUrl} alt={pro.name} />
+                      ) : (
+                        <span className="pro-avatar">{initialsOf(pro.name)}</span>
+                      )}
                       <span className={`pro-status pro-status--${pro.active ? "on" : "off"}`}>
                         {pro.active ? "Activo" : "Inactivo"}
                       </span>

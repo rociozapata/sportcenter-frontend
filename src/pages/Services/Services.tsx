@@ -12,12 +12,6 @@ import futbolImg from "/src/assets/service-futbol.jpg";
 import crossfitImg from "/src/assets/service-crossfit.jpg";
 import funcionalImg from "/src/assets/service-funcional.jpg"
 
-import staffTenisImg from "/src/assets/staff-tenis.webp";
-import staffPadelImg from "/src/assets/staff-pade.jpg";
-import staffFutbolImg from "/src/assets/staff-futbol.jpg";
-import staffFuncionalImg from "/src/assets/staff-funcional.webp";
-import staffCrossfitImg from "/src/assets/staff-crossfit.webp";
-
 // Datos de las disciplinas. Los separamos del JSX para renderizar las
 // 5 filas con un solo .map() en vez de escribir 5 bloques iguales.
 // - key:         id único para React y para la clase CSS
@@ -66,8 +60,7 @@ const service = [
     }
 ];
 
-// Forma normalizada de una card de staff. La usamos tanto para el
-// fallback estático como para los profesionales que llegan de la API.
+// Forma normalizada de una card de staff a partir del profesional de la API.
 // img puede ser null: en ese caso la card muestra un placeholder.
 interface StaffCard {
     key: string;
@@ -77,35 +70,8 @@ interface StaffCard {
     img: string | null;
 }
 
-// Fallback estático: se muestra si la API no devuelve profesionales
-// (o falla), para que la sección nunca quede vacía.
-const staffFallback: StaffCard[] = [
-    { key: "tenis", name: "Natalia", role: "Tenis", specialty: "Ex selección nacional · 8 años", img: staffTenisImg },
-    { key: "padel", name: "Gonzalo", role: "Padel", specialty: "Categoría 3 AJPP · 12 años", img: staffPadelImg },
-    { key: "futbol", name: "Andrés", role: "Futbol", specialty: "Ex profesional · DT certificado", img: staffFutbolImg },
-    { key: "funcional", name: "Sol", role: "Funcional", specialty: "Lic. en kinesiología", img: staffFuncionalImg },
-    { key: "crossfit", name: "Facundo", role: "Crossfit", specialty: "CrossFit Level 2 Trainer", img: staffCrossfitImg },
-];
-
-// ----- Híbrido: datos de la API + imágenes locales ---------------------
-// Las fotos siguen viviendo en el frontend. Para cada profesional que
-// llega de la API, elegimos la imagen matcheando su disciplina contra
-// estas palabras clave. Si no matchea ninguna, la card usa un placeholder.
-const STAFF_IMAGES: { keywords: string[]; img: string }[] = [
-    { keywords: ["tenis", "tennis"], img: staffTenisImg },
-    { keywords: ["padel", "pádel"], img: staffPadelImg },
-    { keywords: ["futbol", "fútbol", "soccer"], img: staffFutbolImg },
-    { keywords: ["crossfit"], img: staffCrossfitImg },
-    { keywords: ["funcional"], img: staffFuncionalImg },
-];
-
-function resolveStaffImage(p: Professional): string | null {
-    const haystack = [p.speciality, ...p.services.map((s) => s.name)].join(" ").toLowerCase();
-    for (const { keywords, img } of STAFF_IMAGES) {
-        if (keywords.some((k) => haystack.includes(k))) return img;
-    }
-    return null;
-}
+// La foto del profesional viene de la API (campo photoUrl). Si está
+// vacía, la card muestra un placeholder con las iniciales.
 
 // Disciplina para la píldora: el primer servicio que ofrece o, si no
 // tiene servicios cargados, su especialidad.
@@ -119,12 +85,11 @@ function initialsOf(name: string): string {
 }
 
 // Página pública /servicios. Las disciplinas, la frase de marca y el CTA
-// son informativos (datos locales). El staff SÍ sale de la API: trae los
-// profesionales activos y resuelve la foto en el front (modelo híbrido).
+// son informativos (datos locales). El staff sale de la API: trae los
+// profesionales activos con su foto (campo photoUrl).
 function Services() {
-    // Arrancan con el fallback para que las secciones/stats nunca queden
-    // vacías; se reemplazan por los datos de la API cuando llegan.
-    const [staffCards, setStaffCards] = useState<StaffCard[]>(staffFallback);
+    const [staffCards, setStaffCards] = useState<StaffCard[]>([]);
+    const [loadingStaff, setLoadingStaff] = useState(true);
     const [serviceCount, setServiceCount] = useState<number>(service.length);
 
     useEffect(() => {
@@ -134,23 +99,23 @@ function Services() {
             .then((pros) => {
                 if (cancelled) return;
                 const active = pros.filter((p) => p.active);
-                if (active.length === 0) return; // sin profesionales: dejamos el fallback
                 setStaffCards(
                     active.map((p) => ({
                         key: String(p.id),
                         name: p.name,
                         role: disciplineOf(p),
                         specialty: p.speciality,
-                        img: resolveStaffImage(p),
+                        img: p.photoUrl || null,
                     }))
                 );
             })
-            .catch(() => { /* si la API falla, queda el staff de fallback */ });
+            .catch(() => { if (!cancelled) setStaffCards([]); })
+            .finally(() => { if (!cancelled) setLoadingStaff(false); });
 
         // Conteo real de disciplinas (tipos de servicio) para el hero.
         listServiceTypes()
             .then((svc) => { if (!cancelled && svc.length > 0) setServiceCount(svc.length); })
-            .catch(() => { /* dejamos el conteo del fallback local */ });
+            .catch(() => { /* dejamos el conteo del array local de disciplinas */ });
 
         return () => { cancelled = true; };
     }, []);
@@ -235,25 +200,31 @@ function Services() {
                         </p>
                     </div>
 
-                    <div className="staff-grid">
-                        {staffCards.slice(0, 4).map((p) => (
-                            <article key={p.key} className="staff-card">
-                                <div className={`staff-card-img${p.img ? "" : " staff-card-img--empty"}`}>
-                                    {p.img ? (
-                                        <img src={p.img} alt={p.name} />
-                                    ) : (
-                                        <span className="staff-card-initials" aria-hidden="true">{initialsOf(p.name)}</span>
-                                    )}
-                                    <span className="staff-card-discipline">{p.role}</span>
-                                </div>
+                    {loadingStaff ? (
+                        <p className="staff-empty">Cargando equipo…</p>
+                    ) : staffCards.length === 0 ? (
+                        <p className="staff-empty">Pronto vas a conocer a nuestro equipo.</p>
+                    ) : (
+                        <div className="staff-grid">
+                            {staffCards.slice(0, 4).map((p) => (
+                                <article key={p.key} className="staff-card">
+                                    <div className={`staff-card-img${p.img ? "" : " staff-card-img--empty"}`}>
+                                        {p.img ? (
+                                            <img src={p.img} alt={p.name} />
+                                        ) : (
+                                            <span className="staff-card-initials" aria-hidden="true">{initialsOf(p.name)}</span>
+                                        )}
+                                        <span className="staff-card-discipline">{p.role}</span>
+                                    </div>
 
-                                <div className="staff-card-info">
-                                    <h3 className="staff-card-name">{p.name}</h3>
-                                    <p className="staff-card-specialty">{p.specialty}</p>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                                    <div className="staff-card-info">
+                                        <h3 className="staff-card-name">{p.name}</h3>
+                                        <p className="staff-card-specialty">{p.specialty}</p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
