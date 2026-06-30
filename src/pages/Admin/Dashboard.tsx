@@ -92,7 +92,8 @@ function Dashboard() {
       getServiceTypes(0, 1),
       getProfessionals(0, 1),
       getAppointments(0, 1, { status: "PENDING" }),
-      getAppointments(0, 1, { status: "CONFIRMED" }),
+      // Confirmados de los últimos 7 días (misma ventana que el gráfico).
+      getAppointments(0, 1, { status: "CONFIRMED", from: toLocalIso(weekStart), to: toLocalIso(todayEnd) }),
       getAppointments(0, 1, { from: toLocalIso(todayStart), to: toLocalIso(todayEnd) }),
       // Para ranking de servicios/profesionales: confirmados reales.
       getAppointments(0, 200, { status: "CONFIRMED" }),
@@ -168,7 +169,7 @@ function Dashboard() {
           <div className="dash-stats">
             <StatCard label="Turnos de hoy" value={metrics.today} accent="primary" icon={<CalendarSvg />} />
             <StatCard label="Turnos pendientes" value={metrics.pending} accent="warning" icon={<ClockSvg />} />
-            <StatCard label="Turnos confirmados" value={metrics.confirmed} accent="success" icon={<CheckSvg />} />
+            <StatCard label="Confirmados (7 días)" value={metrics.confirmed} accent="success" icon={<CheckSvg />} />
             <StatCard label="Usuarios" value={metrics.users} accent="neutral" icon={<UserSvg />} />
           </div>
 

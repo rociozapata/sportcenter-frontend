@@ -114,9 +114,9 @@ export async function createAppointment(payload: CreateAppointmentPayload): Prom
 }
 
 // ----- Mis turnos -----------------------------------------------------
-// El back filtra GET /appointments por el usuario actual cuando el rol
-// es USER (un ADMIN ve todos). Reusamos ese endpoint para alimentar el
-// perfil. Pedimos 100 de una para evitar paginar en la UI del perfil.
+// GET /appointments/me devuelve SIEMPRE los turnos del usuario autenticado,
+// sin importar el rol (un ADMIN ve solo los suyos, no los de todos).
+// Por eso alimenta el perfil. Pedimos 100 de una para no paginar en la UI.
 export interface MyAppointment {
   id: number;
   startTime: string;
@@ -131,7 +131,7 @@ export interface MyAppointment {
 }
 
 export async function listMyAppointments(): Promise<MyAppointment[]> {
-  const response = await bookingFetch(`/appointments?page=0&size=100&sort=startTime,desc`);
+  const response = await bookingFetch(`/appointments/me?page=0&size=100&sort=startTime,desc`);
   const data: PageResponse<MyAppointment> = await response.json();
   return data.content;
 }

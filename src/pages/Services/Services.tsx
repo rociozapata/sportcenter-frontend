@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Services.css"
+import { listProfessionals, listServiceTypes } from "../../services/booking";
+import type { Professional } from "../../services/admin";
 // Importamos cada imagen: Vite las procesa y nos devuelve la URL final.
 // Hacerlo por import (en vez de strings sueltos) asegura que la imagen
 // entre en la build y rompe en compilación si el archivo no existe.
@@ -8,12 +11,6 @@ import padelImg from "/src/assets/service-padel.jpg";
 import futbolImg from "/src/assets/service-futbol.jpg";
 import crossfitImg from "/src/assets/service-crossfit.jpg";
 import funcionalImg from "/src/assets/service-funcional.jpg"
-
-import staffTenisImg from "/src/assets/staff-tenis.webp";
-import staffPadelImg from "/src/assets/staff-pade.jpg";
-import staffFutbolImg from "/src/assets/staff-futbol.jpg";
-import staffFuncionalImg from "/src/assets/staff-funcional.webp";
-import staffCrossfitImg from "/src/assets/staff-crossfit.webp";
 
 // Datos de las disciplinas. Los separamos del JSX para renderizar las
 // 5 filas con un solo .map() en vez de escribir 5 bloques iguales.
@@ -63,19 +60,66 @@ const service = [
     }
 ];
 
-// Mismo enfoque para el staff: un array que después mapeamos a cards.
-const staff = [
-    { key: "tenis", name: "Natalia", role: "Tenis", specialty: "Ex selección nacional · 8 años", img: staffTenisImg },
-    { key: "padel", name: "Gonzalo", role: "Padel", specialty: "Categoría 3 AJPP · 12 años", img: staffPadelImg },
-    { key: "futbol", name: "Andrés", role: "Futbol", specialty: "Ex profesional · DT certificado", img: staffFutbolImg },
-    { key: "funcional", name: "Sol", role: "Funcional", specialty: "Lic. en kinesiología", img: staffFuncionalImg },
-    { key: "crossfit", name: "Facundo", role: "Crossfit", specialty: "CrossFit Level 2 Trainer", img: staffCrossfitImg },
-];
+// Forma normalizada de una card de staff a partir del profesional de la API.
+// img puede ser null: en ese caso la card muestra un placeholder.
+interface StaffCard {
+    key: string;
+    name: string;
+    role: string;       // disciplina (píldora superpuesta)
+    specialty: string;  // bajada / experiencia
+    img: string | null;
+}
 
-// Página pública /servicios. Es informativa (no pega a la API):
-// muestra las disciplinas, una frase de marca, el staff y un CTA final.
-// Todos los datos salen de los arrays de arriba.
+// La foto del profesional viene de la API (campo photoUrl). Si está
+// vacía, la card muestra un placeholder con las iniciales.
+
+// Disciplina para la píldora: el primer servicio que ofrece o, si no
+// tiene servicios cargados, su especialidad.
+function disciplineOf(p: Professional): string {
+    return p.services[0]?.name ?? p.speciality;
+}
+
+// Iniciales para el placeholder cuando no hay foto ("Juan Pérez" → "JP").
+function initialsOf(name: string): string {
+    return name.trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join("") || "?";
+}
+
+// Página pública /servicios. Las disciplinas, la frase de marca y el CTA
+// son informativos (datos locales). El staff sale de la API: trae los
+// profesionales activos con su foto (campo photoUrl).
 function Services() {
+    const [staffCards, setStaffCards] = useState<StaffCard[]>([]);
+    const [loadingStaff, setLoadingStaff] = useState(true);
+    const [serviceCount, setServiceCount] = useState<number>(service.length);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        listProfessionals()
+            .then((pros) => {
+                if (cancelled) return;
+                const active = pros.filter((p) => p.active);
+                setStaffCards(
+                    active.map((p) => ({
+                        key: String(p.id),
+                        name: p.name,
+                        role: disciplineOf(p),
+                        specialty: p.speciality,
+                        img: p.photoUrl || null,
+                    }))
+                );
+            })
+            .catch(() => { if (!cancelled) setStaffCards([]); })
+            .finally(() => { if (!cancelled) setLoadingStaff(false); });
+
+        // Conteo real de disciplinas (tipos de servicio) para el hero.
+        listServiceTypes()
+            .then((svc) => { if (!cancelled && svc.length > 0) setServiceCount(svc.length); })
+            .catch(() => { /* dejamos el conteo del array local de disciplinas */ });
+
+        return () => { cancelled = true; };
+    }, []);
+
     return (
         <>
             {/* HERO: encabezado con título grande, bajada y badges decorativos. */}
@@ -90,9 +134,10 @@ function Services() {
                         Elegí tu favorita y reservá tu primer turno en minutos.
                     </p>
                     <div className="services-hero-stats">
-                        <div><strong>5</strong><span>Disciplinas</span></div>
-                        <div><strong>+15</strong><span>Profesionales</span></div>
-                        <div><strong>7</strong><span>Días por semana</span></div>
+                        <div><strong>{serviceCount}</strong><span>Disciplinas</span></div>
+                        <div><strong>{staffCards.length}</strong><span>Profesionales</span></div>
+                        {/* Lun-Vie y Sáb; domingo cerrado → 6 días. */}
+                        <div><strong>6</strong><span>Días por semana</span></div>
                     </div>
                 </div>
             </section>
@@ -155,21 +200,31 @@ function Services() {
                         </p>
                     </div>
 
-                    <div className="staff-grid">
-                        {staff.map((p) => (
-                            <article key={p.key} className={`staff-card staff-card--${p.key}`}>
-                                <div className="staff-card-img">
-                                    <img src={p.img} alt={p.name} />
-                                    <span className="staff-card-discipline">{p.role}</span>
-                                </div>
+                    {loadingStaff ? (
+                        <p className="staff-empty">Cargando equipo…</p>
+                    ) : staffCards.length === 0 ? (
+                        <p className="staff-empty">Pronto vas a conocer a nuestro equipo.</p>
+                    ) : (
+                        <div className="staff-grid">
+                            {staffCards.slice(0, 4).map((p) => (
+                                <article key={p.key} className="staff-card">
+                                    <div className={`staff-card-img${p.img ? "" : " staff-card-img--empty"}`}>
+                                        {p.img ? (
+                                            <img src={p.img} alt={p.name} />
+                                        ) : (
+                                            <span className="staff-card-initials" aria-hidden="true">{initialsOf(p.name)}</span>
+                                        )}
+                                        <span className="staff-card-discipline">{p.role}</span>
+                                    </div>
 
-                                <div className="staff-card-info">
-                                    <h3 className="staff-card-name">{p.name}</h3>
-                                    <p className="staff-card-specialty">{p.specialty}</p>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                                    <div className="staff-card-info">
+                                        <h3 className="staff-card-name">{p.name}</h3>
+                                        <p className="staff-card-specialty">{p.specialty}</p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 

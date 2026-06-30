@@ -1147,6 +1147,21 @@
     font-size: 1.1rem;
 }
 
+/* Avatar con foto cargada (campo photoUrl). */
+.pro-avatar--photo {
+    object-fit: cover;
+    background: #e2e8f0;
+}
+
+/* Vista previa de la foto en el formulario de alta/edición. */
+.pro-form-preview {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
 .pro-status {
     font-size: 0.72rem;
     font-weight: 700;

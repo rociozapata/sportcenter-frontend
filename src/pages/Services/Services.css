@@ -378,9 +378,20 @@
 
 .staff-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* 4 entrenadores en 2x2: dos columnas, ancho acotado y centrado
+       para que las cards no queden estiradas en pantallas anchas. */
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
-    justify-content: center;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* Mensaje de carga / sin profesionales en la sección de staff. */
+.staff-empty {
+    text-align: center;
+    color: #64748b;
+    font-size: 1.05rem;
+    margin: 0;
 }
 
 .staff-card {
@@ -441,6 +452,22 @@
 
 .staff-card:hover .staff-card-img img {
     transform: scale(1.08);
+}
+
+/* Placeholder cuando el profesional no tiene foto local: iniciales
+   centradas sobre un degradado de marca. */
+.staff-card-img--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a365d, #2d4a73);
+}
+
+.staff-card-initials {
+    font-size: 3.4rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.88);
+    letter-spacing: 0.04em;
 }
 
 /* Píldora con la disciplina, superpuesta arriba a la izquierda. */
