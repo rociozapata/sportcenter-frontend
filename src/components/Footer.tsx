@@ -66,7 +66,7 @@ function Footer() {
                 <section className="footer-col">
                     <h3>Enlaces útiles</h3>
                     <Link to="/servicios" className="footer-link">Servicios</Link>
-                    <Link to="/turnos" className="footer-link">Mis turnos</Link>
+                    <Link to="/perfil" className="footer-link">Mis turnos</Link>
                 </section>
             </div>
 
